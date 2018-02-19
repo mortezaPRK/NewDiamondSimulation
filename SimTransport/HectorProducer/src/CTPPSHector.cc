@@ -9,17 +9,22 @@
 #include "HepMC/SimpleVector.h"
 
 #include "CLHEP/Random/RandGauss.h"
+#include "CTPPSTools/Utilities/interface/CTPPSUtilities.h"
 
 #include "TRandom3.h"
-#include <TMatrixD.h>
+#include <TMath.h>
 
 #include "H_Parameters.h"
+#include "H_RecRPObject.h"
 
 #include <math.h>
+#include <iomanip>
+#include <cstdlib>
+
 
 CTPPSHector::CTPPSHector(const edm::ParameterSet & param, bool verbosity,bool CTPPSTransport) : 
-    m_smearAng(false),m_sig_e(0.),m_smearE(false),m_sigmaSTX(0.),m_sigmaSTY(0.),
-    fCrossAngleCorr(false),fCrossingAngle(0.),fBeamMomentum(0),fBeamEnergy(0),
+    m_smearAng(false),m_sig_e(0.),m_smearE(false),m_sigmaSTX(0.),m_sigmaSTY(0.),m_sigmaSX(0.),m_sigmaSY(0.),
+    fCrossAngleCorr(false),fCrossingAngleBeam1(0.),fCrossingAngleBeam2(0.),fBeamMomentum(0),fBeamEnergy(0),
     fVtxMeanX(0.),fVtxMeanY(0.),fVtxMeanZ(0.),fMomentumMin(0.),
     m_verbosity(verbosity), 
     m_CTPPSTransport(CTPPSTransport),NEvent(0)
@@ -38,60 +43,34 @@ CTPPSHector::CTPPSHector(const edm::ParameterSet & param, bool verbosity,bool CT
     m_smearAng      = hector_par.getParameter<bool>("smearAng");
     m_sigmaSTX      = hector_par.getParameter<double>("sigmaSTX" );
     m_sigmaSTY      = hector_par.getParameter<double>("sigmaSTY" );
+    m_sigmaSX       = hector_par.getParameter<double>("sigmaSX");
+    m_sigmaSY       = hector_par.getParameter<double>("sigmaSY");
     m_smearE        = hector_par.getParameter<bool>("smearEnergy");
     m_sig_e         = hector_par.getParameter<double>("sigmaEnergy");
     etacut          = hector_par.getParameter<double>("EtaCutForHector" );
     //CTPPS
     fCrossAngleCorr = hector_par.getParameter<bool>("CrossAngleCorr");
-    fCrossingAngle  = hector_par.getParameter<double>("CrossingAngle");
+    fCrossingAngleBeam1  = hector_par.getParameter<double>("CrossingAngleBeam1");
+    fCrossingAngleBeam2  = hector_par.getParameter<double>("CrossingAngleBeam2");
     fBeamEnergy     = hector_par.getParameter<double>("BeamEnergy"); // beam energy in GeV
     fVtxMeanX       = hector_par.getParameter<double>("VtxMeanX");
     fVtxMeanY       = hector_par.getParameter<double>("VtxMeanY");
     fVtxMeanZ       = hector_par.getParameter<double>("VtxMeanZ");
     fMomentumMin    = hector_par.getParameter<double>("MomentumMin"); 
+    fBeamXatIP      = hector_par.getParameter<double>("BeamXatIP"); // position in mm
+    fBeamYatIP      = hector_par.getParameter<double>("BeamYatIP"); // position in mm
+
+    fBeamMomentum = sqrt(fBeamEnergy*fBeamEnergy - ProtonMassSQ);
 
     theCorrespondenceMap.clear();
-
-    if(m_verbosity) {
-        edm::LogInfo("CTPPSHectorSetup") << "===================================================================\n"  
-            << " * * * * * * * * * * * * * * * * * * * * * * * * * * * *           \n"  
-            << " *                                                         *       \n"  
-            << " *                   --<--<--  A fast simulator --<--<--     *     \n"  
-            << " *                 | --<--<--     of particle   --<--<--     *     \n"  
-            << " *  ----HECTOR----<                                          *     \n"  
-            << " *                 | -->-->-- transport through-->-->--      *     \n"   
-            << " *                   -->-->-- generic beamlines -->-->--     *     \n"  
-            << " *                                                           *     \n"   
-            << " * JINST 2:P09005 (2007)                                     *     \n"  
-            << " *      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *     \n"  
-            << " *       http://www.fynu.ucl.ac.be/hector.html               *     \n"  
-            << " *                                                           *     \n"  
-            << " * Center for Cosmology, Particle Physics and Phenomenology  *     \n"  
-            << " *              Universite catholique de Louvain             *     \n"  
-            << " *                 Louvain-la-Neuve, Belgium                 *     \n"  
-            << " *                                                         *       \n"  
-            << " * * * * * * * * * * * * * * * * * * * * * * * * * * * *           \n"   
-            << " CTPPSHector configuration: \n" 
-            << " m_CTPPSTransport   = " << m_CTPPSTransport << "\n"
-            << " lengthctpps      = " << lengthctpps << "\n"
-            << " m_f_ctpps_f      =  " << m_f_ctpps_f << "\n"
-            << " m_b_ctpps_b      =  " << m_b_ctpps_b << "\n"
-            << "===================================================================\n";
-    }  
-    edm::FileInPath b1(beam1filename.c_str());
-    edm::FileInPath b2(beam2filename.c_str());
+    
+    CTPPSTools::fBeamMomentum=fBeamMomentum;
+    CTPPSTools::fBeamEnergy=fBeamEnergy;
+    CTPPSTools::fCrossingAngleBeam1=-fCrossingAngleBeam1;
+    CTPPSTools::fCrossingAngleBeam2=-fCrossingAngleBeam2;
 
     // construct beam line for CTPPS (forward 1 backward 2):                                                                                           
-    if(m_CTPPSTransport && lengthctpps>0. ) {
-        m_beamlineCTPPS1 = new H_BeamLine( -1, lengthctpps + 0.1 ); // (direction, length)
-        m_beamlineCTPPS2 = new H_BeamLine( 1, lengthctpps + 0.1 ); //
-        m_beamlineCTPPS1->fill( b2.fullPath(), 1, "IP5" );
-        m_beamlineCTPPS2->fill( b1.fullPath(), 1, "IP5" );
-        m_beamlineCTPPS1->offsetElements( 120, 0.097 );
-        m_beamlineCTPPS2->offsetElements( 120, 0.097 );
-        m_beamlineCTPPS1->calcMatrix();
-        m_beamlineCTPPS2->calcMatrix();
-    } else {
+    if(!SetBeamLine()) {
         if ( m_verbosity ) LogDebug("CTPPSHectorSetup") << "CTPPSHector: WARNING: lengthctpps=  " << lengthctpps;
     } 
 }
@@ -101,8 +80,7 @@ CTPPSHector::~CTPPSHector(){
     for (std::map<unsigned int,H_BeamParticle*>::iterator it = m_beamPart.begin(); it != m_beamPart.end(); ++it ) {
         delete (*it).second;
     }
-    delete m_beamlineCTPPS1;
-    delete m_beamlineCTPPS2;
+
 }
 
 void CTPPSHector::clearApertureFlags(){
@@ -123,7 +101,7 @@ void CTPPSHector::clear(){
 
 void CTPPSHector::add( const HepMC::GenEvent * evt ,const edm::EventSetup & iSetup, CLHEP::HepRandomEngine * engine) {
 
-    H_BeamParticle * h_p  = NULL;
+    H_BeamParticle* h_p  = NULL;
     unsigned int line;
 
     for (HepMC::GenEvent::particle_const_iterator eventParticle =evt->particles_begin();
@@ -155,30 +133,32 @@ void CTPPSHector::add( const HepMC::GenEvent * evt ,const edm::EventSetup & iSet
 
                     e = sqrt(pow(mass,2)+pow(px,2)+pow(py,2)+pow(pz,2));
 
+                    TXforPosition=0.;
+                    TYforPosition=0.;
+
                     // Apply Beam and Crossing Angle Corrections
                     LorentzVector p_out(px,py,pz,e);
                     ApplyBeamCorrection(p_out, engine);
-                    if (fCrossAngleCorr) LorentzBoost(const_cast<LorentzVector&>(p_out),"LAB");
+                    CTPPSTools::LorentzBoost(p_out,"LAB");
 
                     // from mm to cm        
                     double XforPosition = (*eventParticle)->production_vertex()->position().x()/cm;//cm
                     double YforPosition = (*eventParticle)->production_vertex()->position().y()/cm;//cm
                     double ZforPosition = (*eventParticle)->production_vertex()->position().z()/cm;//cm
 
-                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << " fVtxMeanX: " << fVtxMeanX << " fVtxMeanY: " << fVtxMeanY << " fVtxMeanZ: "  << fVtxMeanZ ;
-                    // It is important to set the Position before the 4Momentum otherwise HECTOR resets variables
-                    h_p->setPosition(-(XforPosition-fVtxMeanX)*cm_to_um,(YforPosition-fVtxMeanY)*cm_to_um,TXforPosition,TYforPosition,-(ZforPosition)*cm_to_m);
-                    
-                    h_p->set4Momentum( -p_out.px(), p_out.py(), -p_out.pz(), p_out.e() );
+                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") <<
+                                    " fVtxMeanX: " << fVtxMeanX << " fVtxMeanY: " << fVtxMeanY << " fVtxMeanZ: "  << fVtxMeanZ ;
 
+                    h_p->set4Momentum(-p_out.px(), p_out.py(), abs(p_out.pz()), p_out.e());
+                    h_p->setPosition(-((XforPosition-fVtxMeanX)*cm_to_um+fBeamXatIP*mm_to_um),(YforPosition-fVtxMeanY)*cm_to_um+fBeamYatIP*mm_to_um,
+                                        h_p->getTX()+TXforPosition,h_p->getTY()+TYforPosition,-(ZforPosition-fVtxMeanZ)*cm_to_m);
+                    
                     m_beamPart[line] = h_p;
                     m_direct[line] = 0;
                     m_direct[line] = ( pz > 0 ) ? 1 : -1;
-
-                    m_eta[line] = (*eventParticle)->momentum().eta();
+                    m_eta[line] = p_out.eta();
                     m_pdg[line] = (*eventParticle)->pdg_id();
-                    m_pz[line]  = (*eventParticle)->momentum().pz();
-
+                    m_pz[line]  = p_out.pz();
                     if(m_verbosity) { 
                         LogDebug("CTPPSHectorEventProcessing") << "CTPPSHector:add: barcode = " << line 
                             << " status = " << g->status() 
@@ -198,8 +178,8 @@ void CTPPSHector::add( const HepMC::GenEvent * evt ,const edm::EventSetup & iSet
 void CTPPSHector::filterCTPPS(TRandom3* rootEngine){
 
     unsigned int line;
-    H_BeamParticle*  part = NULL;
-
+    H_BeamParticle * part = NULL;
+ 
     std::map< unsigned int, H_BeamParticle* >::iterator it;
 
     bool is_stop;
@@ -218,18 +198,20 @@ void CTPPSHector::filterCTPPS(TRandom3* rootEngine){
             if ( (*m_isCharged.find( line )).second ) {
                 direction = (*m_direct.find( line )).second;
                 if ( direction == 1 && m_beamlineCTPPS1 != 0 ) {
+                    
+ 		    part->computePath(&*m_beamlineCTPPS1);
 
-                    part->computePath( m_beamlineCTPPS1 );
-
-                    is_stop = part->stopped( m_beamlineCTPPS1 );
-                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << "CTPPSHector:filterCTPPS: barcode = " << line << " positive is_stop=  "<< is_stop;
+                    is_stop = part->stopped(&* m_beamlineCTPPS1 );
+                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << 
+                                    "CTPPSHector:filterCTPPS: barcode = " << line << " positive is_stop=  "<< is_stop;
                 }
                 else if ( direction == -1 && m_beamlineCTPPS2 != 0 ){
 
-                    part->computePath( m_beamlineCTPPS2 );
+                    part->computePath(&*m_beamlineCTPPS2);
 
-                    is_stop = part->stopped( m_beamlineCTPPS2 );
-                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << "CTPPSHector:filterCTPPS: barcode = " << line << " negative is_stop=  "<< is_stop;
+                    is_stop = part->stopped(&*m_beamlineCTPPS2 );
+                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << 
+                                    "CTPPSHector:filterCTPPS: barcode = " << line << " negative is_stop=  "<< is_stop;
                 }
                 else {
                     is_stop = true;
@@ -238,18 +220,19 @@ void CTPPSHector::filterCTPPS(TRandom3* rootEngine){
 
                 //propagating
                 m_isStoppedctpps[line] = is_stop;
-                if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << "CTPPSHector:filterCTPPS: barcode = " << line << " isStopped=" << (*m_isStoppedctpps.find(line)).second;
+                if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << 
+                                "CTPPSHector:filterCTPPS: barcode = " << line << " isStopped=" << (*m_isStoppedctpps.find(line)).second;
 
                 if (!is_stop) {
                     if ( direction == 1 ) part->propagate( m_f_ctpps_f ); 
                     if ( direction == -1 ) part->propagate( m_b_ctpps_b );  
                     x1_ctpps = -part->getX()/millimeter;
                     y1_ctpps = part->getY()/millimeter;
-                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << "CTPPSHector:filterCTPPS: barcode = " << line << " x=  "<< x1_ctpps <<" y= " << y1_ctpps;
-
+                    if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << 
+                                   "CTPPSHector:filterCTPPS: barcode = " << line << " x=  "<< x1_ctpps <<" y= " << y1_ctpps;
                     m_xAtTrPoint[line]  = x1_ctpps;
                     m_yAtTrPoint[line]  = y1_ctpps;
-                    m_TxAtTrPoint[line] = -part->getTX();
+                    m_TxAtTrPoint[line] = -part->getTX(); // needs to be reflected due to the way phi is calculated here
                     m_TyAtTrPoint[line] = part->getTY();
                     m_eAtTrPoint[line]  = part->getE();
 
@@ -257,7 +240,8 @@ void CTPPSHector::filterCTPPS(TRandom3* rootEngine){
             }// if isCharged
             else {
                 m_isStoppedctpps[line] = true;// imply that neutral particles stopped to reach 420m
-                if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << "CTPPSHector:filterCTPPS: barcode = " << line << " isStopped=" << (*m_isStoppedctpps.find(line)).second;
+                if(m_verbosity) LogDebug("CTPPSHectorEventProcessing") << 
+                                "CTPPSHector:filterCTPPS: barcode = " << line << " isStopped=" << (*m_isStoppedctpps.find(line)).second;
             }
 
         } // for (it = m_beamPart.begin(); it != m_beamPart.end(); it++ ) 
@@ -282,65 +266,28 @@ void CTPPSHector::print() const {
 void CTPPSHector::ApplyBeamCorrection(LorentzVector& p_out, CLHEP::HepRandomEngine* engine)
 {
 
-    double microrad = 1.e-6;
-    double theta = p_out.theta(); if (p_out.pz()<0) theta=CLHEP::pi-theta;
+    double theta  = p_out.theta();
+    double thetax = atan(p_out.px()/abs(p_out.pz()));
+    double thetay = atan(p_out.py()/abs(p_out.pz()));
+    double energy = p_out.e();
+
+    int direction = (p_out.pz()>0)?1:-1;
+
+    if (p_out.pz()<0) theta=CLHEP::pi-theta;
+
     double dtheta_x = (double)(m_smearAng)?CLHEP::RandGauss::shoot(engine,0.,m_sigmaSTX):0;
     double dtheta_y = (double)(m_smearAng)?CLHEP::RandGauss::shoot(engine,0.,m_sigmaSTY):0;
     double denergy  = (double)(m_smearE)?CLHEP::RandGauss::shoot(engine,0.,m_sig_e):0.;
 
-    double p = sqrt((p_out.px())*(p_out.px())+(p_out.py())*(p_out.py())+(p_out.pz())*(p_out.pz()));
-    double px = p*sin(theta+dtheta_x*microrad)*cos(p_out.phi());
-    double py = p*sin(theta+dtheta_y*microrad)*sin(p_out.phi());
-    double pz = p*(cos(theta)+denergy);
+    double s_theta = sqrt(pow(thetax+dtheta_x*urad,2)+pow(thetay+dtheta_y*urad,2)); 
+    double s_phi = atan2(thetay+dtheta_y*urad,thetax+dtheta_x*urad);
+    energy+=denergy;
+    double p = sqrt(pow(energy,2)-ProtonMassSQ);
 
-    if (p_out.pz()<0) pz*=-1;
-
-    double e  = sqrt(px*px+py*py+pz*pz+ProtonMassSQ);
-    p_out.setPx(px);
-    p_out.setPy(py);
-    p_out.setPz(pz);
-    p_out.setE(e);
-
-}
-
-void CTPPSHector::LorentzBoost(LorentzVector& p_out, const string& frame)
-{
-    // Use a matrix
-    double microrad = 1.e-6;
-    TMatrixD tmpboost(4,4);
-    double alpha_ = 0.;
-    double phi_  = fCrossingAngle*microrad;
-    if (p_out.pz()<0) phi_*=-1;
-    tmpboost(0,0) = 1./cos(phi_);
-    tmpboost(0,1) = - cos(alpha_)*sin(phi_);
-    tmpboost(0,2) = - tan(phi_)*sin(phi_);
-    tmpboost(0,3) = - sin(alpha_)*sin(phi_);
-    tmpboost(1,0) = - cos(alpha_)*tan(phi_);
-    tmpboost(1,1) = 1.;
-    tmpboost(1,2) = cos(alpha_)*tan(phi_);
-    tmpboost(1,3) = 0.;
-    tmpboost(2,0) = 0.;
-    tmpboost(2,1) = - cos(alpha_)*sin(phi_);
-    tmpboost(2,2) = cos(phi_);
-    tmpboost(2,3) = - sin(alpha_)*sin(phi_);
-    tmpboost(3,0) = - sin(alpha_)*tan(phi_);
-    tmpboost(3,1) = 0.;
-    tmpboost(3,2) = sin(alpha_)*tan(phi_);
-    tmpboost(3,3) = 1.;
-
-    if(frame=="LAB") tmpboost.Invert();
-
-    TMatrixD p4(4,1);
-    p4(0,0) = p_out.e();
-    p4(1,0) = p_out.px();
-    p4(2,0) = p_out.py();
-    p4(3,0) = p_out.pz();
-    TMatrixD p4lab(4,1);
-    p4lab = tmpboost * p4;
-    p_out.setPx(p4lab(1,0));
-    p_out.setPy(p4lab(2,0));
-    p_out.setPz(p4lab(3,0));
-    p_out.setE(p4lab(0,0));
+    p_out.setPx((double)p*sin(s_theta)*cos(s_phi));
+    p_out.setPy((double)p*sin(s_theta)*sin(s_phi));
+    p_out.setPz((double)p*(cos(s_theta))*direction);
+    p_out.setE(energy);
 }
 
 HepMC::GenEvent * CTPPSHector::addPartToHepMC( HepMC::GenEvent * evt ){
@@ -350,7 +297,7 @@ HepMC::GenEvent * CTPPSHector::addPartToHepMC( HepMC::GenEvent * evt ){
     unsigned int line;
 
     HepMC::GenParticle * gpart;
-    long double tx,ty,theta,fi,energy,time = 0;
+    double tx,ty,theta,fi,energy,time = 0;
     std::map< unsigned int, H_BeamParticle* >::iterator it;
 
     for (it = m_beamPart.begin(); it != m_beamPart.end(); ++it ) {
@@ -368,7 +315,7 @@ HepMC::GenEvent * CTPPSHector::addPartToHepMC( HepMC::GenEvent * evt ){
                 ty     = (*m_TyAtTrPoint.find(line)).second / 1000000.;
                 theta  = sqrt((tx*tx) + (ty*ty));
                 double ddd = 0.;
-                long double fi_  = 0.; 
+                double fi_  = 0.; 
                 if ( !((*m_isStoppedctpps.find(line)).second)) {
                     if( (*m_direct.find( line )).second >0 ) {
                         ddd = m_f_ctpps_f;
@@ -430,3 +377,60 @@ HepMC::GenEvent * CTPPSHector::addPartToHepMC( HepMC::GenEvent * evt ){
 
     return evt;
 } 
+bool CTPPSHector::SetBeamLine()
+{
+    edm::FileInPath b1(beam1filename.c_str());
+    edm::FileInPath b2(beam2filename.c_str());
+    if(m_verbosity) {
+        edm::LogInfo("CTPPSHectorSetup") << "===================================================================\n"  
+            << " * * * * * * * * * * * * * * * * * * * * * * * * * * * *           \n"  
+            << " *                                                         *       \n"  
+            << " *                   --<--<--  A fast simulator --<--<--     *     \n"  
+            << " *                 | --<--<--     of particle   --<--<--     *     \n"  
+            << " *  ----HECTOR----<                                          *     \n"  
+            << " *                 | -->-->-- transport through-->-->--      *     \n"   
+            << " *                   -->-->-- generic beamlines -->-->--     *     \n"  
+            << " *                                                           *     \n"   
+            << " * JINST 2:P09005 (2007)                                     *     \n"  
+            << " *      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *     \n"  
+            << " *       http://www.fynu.ucl.ac.be/hector.html               *     \n"  
+            << " *                                                           *     \n"  
+            << " * Center for Cosmology, Particle Physics and Phenomenology  *     \n"  
+            << " *              Universite catholique de Louvain             *     \n"  
+            << " *                 Louvain-la-Neuve, Belgium                 *     \n"  
+            << " *                                                         *       \n"  
+            << " * * * * * * * * * * * * * * * * * * * * * * * * * * * *           \n"   
+            << " CTPPSHector configuration: \n" 
+            << " m_CTPPSTransport   = " << m_CTPPSTransport << "\n"
+            << " lengthctpps      = " << lengthctpps << "\n"
+            << " m_f_ctpps_f      =  " << m_f_ctpps_f << "\n"
+            << " m_b_ctpps_b      =  " << m_b_ctpps_b << "\n"
+            << "===================================================================\n";
+    }  
+    m_beamlineCTPPS1=NULL;
+    m_beamlineCTPPS2=NULL;
+
+    // construct beam line for CTPPS (forward 1 backward 2):                                                                                           
+    if(m_CTPPSTransport && lengthctpps>0. ) {
+        m_beamlineCTPPS1 = std::unique_ptr<H_BeamLine>(new H_BeamLine(-1, lengthctpps + 0.1 )); // (direction, length)
+        m_beamlineCTPPS1->fill( b2.fullPath(), 1, "IP5");
+        m_beamlineCTPPS2 = std::unique_ptr<H_BeamLine>(new H_BeamLine( 1, lengthctpps + 0.1 )); //
+        m_beamlineCTPPS2->fill( b1.fullPath(), 1, "IP5");
+        //m_beamlineCTPPS1->offsetElements( 120, 0.097 );
+        //m_beamlineCTPPS2->offsetElements( 120,-0.097 );
+    }
+    else {
+        if ( m_verbosity ) LogDebug("CTPPSHectorSetup") << "CTPPSHector: WARNING: lengthctpps=  " << lengthctpps;        
+        return false;
+    }
+    if (m_verbosity) {
+          std::cout  << "====================================================================\n"
+                     << "                  Forward beam line elements \n";
+          m_beamlineCTPPS1->showElements();
+          std::cout << "====================================================================\n"
+                    << "                 Backward beam line elements \n";
+          m_beamlineCTPPS2->showElements();
+    }
+
+    return true;
+}

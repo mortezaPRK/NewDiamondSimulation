@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 # geometry
-from  Configuration.Geometry.geometry_CTPPS_cfi import *
+from  Geometry.VeryForwardGeometry.geometry_CTPPS_cfi import *
 #from Geometry.VeryForwardGeometry.geometryRP_cfi import *
 
 # local clusterizer
@@ -13,8 +13,8 @@ from RecoCTPPS.PixelLocal.ctppsPixelRecHits_cfi import ctppsPixelRecHits
 # local track producer
 from RecoCTPPS.PixelLocal.ctppsPixelLocalTracks_cfi import ctppsPixelLocalTracks
 
-from Geometry.VeryForwardGeometryBuilder.ctppsIncludeAlignments_cfi import *
-ctppsIncludeAlignments.RealFiles = cms.vstring("Alignment/CTPPS/data/RPixGeometryCorrections.xml")
+#from Geometry.VeryForwardGeometryBuilder.ctppsIncludeAlignments_cfi import *
+#ctppsIncludeAlignments.RealFiles = cms.vstring("Alignment/CTPPS/data/RPixGeometryCorrections.xml")
 
 ctppsPixelLocalReconstruction = cms.Sequence(
     ctppsPixelClusters*ctppsPixelRecHits*ctppsPixelLocalTracks

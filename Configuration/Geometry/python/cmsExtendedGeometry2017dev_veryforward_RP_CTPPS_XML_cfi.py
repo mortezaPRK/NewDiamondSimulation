@@ -303,6 +303,7 @@ XMLIdealGeometryESSource = cms.ESSource("XMLIdealGeometryESSource",
         'Geometry/VeryForwardData/data/CTPPS_Diamond_Planes/CTPPS_Diamond_Plane3.xml',
         #'Geometry/VeryForwardData/data/CTPPS_Diamond_Planes/CTPPS_Diamond_Plane4.xml',
         'Geometry/VeryForwardData/data/CTPPS_Diamond_Detector_Assembly.xml',
+        'Geometry/VeryForwardData/data/CTPPS_Diamond_Sensitive_Dets.xml',
 	'Geometry/VeryForwardData/data/CTPPS_UFSD_Segments/CTPPS_UFSD_Pattern1.xml', #ufsd->
         'Geometry/VeryForwardData/data/CTPPS_UFSD_Segments/CTPPS_UFSD_Pattern2_SegmentA.xml',
         'Geometry/VeryForwardData/data/CTPPS_UFSD_Segments/CTPPS_UFSD_Pattern2_SegmentB.xml', 
@@ -343,6 +344,7 @@ XMLIdealGeometryESSource = cms.ESSource("XMLIdealGeometryESSource",
         'Geometry/VeryForwardData/data/CTPPS_210_Left_Station.xml',#totem, from RP -> CTPPS
         'Geometry/VeryForwardData/data/CTPPS_Stations_Assembly.xml',#totem, from RP -> CTPPS
         'Geometry/VeryForwardData/data/CTPPS_Cuts_Per_Region.xml',#totem, from RP -> CTPPS
+        'Geometry/VeryForwardData/data/RP_Sensitive_Dets.xml',#totem, from RP -> CTPPS
         'Geometry/VeryForwardData/data/ppstrackerMaterials.xml',
         'Geometry/VeryForwardData/data/CTPPS_Pixel_Module.xml',
         'Geometry/VeryForwardData/data/CTPPS_Pixel_Module_2x2.xml',

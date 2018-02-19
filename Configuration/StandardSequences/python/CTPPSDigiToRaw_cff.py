@@ -15,8 +15,9 @@ from EventFilter.DTRawToDigi.dtPacker_cfi import *
 from EventFilter.RPCRawToDigi.rpcPacker_cfi import *
 from EventFilter.CastorRawToDigi.CastorDigiToRaw_cfi import *
 from EventFilter.CTPPSRawToDigi.CTPPSPixelDigiToRaw_cfi import *
+from EventFilter.CTPPSRawToDigi.CTPPSTotemDigiToRaw_cfi import *
 from EventFilter.RawDataCollector.rawDataCollector_cfi import *
 from L1Trigger.Configuration.L1TDigiToRaw_cff import *
 #DigiToRaw = cms.Sequence(L1TDigiToRaw*siPixelRawData*SiStripDigiToRaw*ecalPacker*esDigiToRaw*hcalRawData*cscpacker*dtpacker*rpcpacker*rawDataCollector)
 #DigiToRaw = cms.Sequence(L1TDigiToRaw*siPixelRawData*SiStripDigiToRaw*ecalPacker*esDigiToRaw*hcalRawData*cscpacker*dtpacker*rpcpacker*castorRawData*ctppsPixelRawData*rawDataCollector)
-DigiToRaw = cms.Sequence(ctppsPixelRawData*rawDataCollector)
+DigiToRaw = cms.Sequence(ctppsPixelRawData*ctppsTotemRawData*rawDataCollector)

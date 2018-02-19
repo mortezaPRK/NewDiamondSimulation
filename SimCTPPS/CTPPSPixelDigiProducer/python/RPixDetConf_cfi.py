@@ -35,7 +35,7 @@ RPixDetDigitizer = cms.EDProducer("CTPPSPixelDigiProducer",
   
 #  RPixDummyROCThreshold = cms.double(2500.0),
    RPixDummyROCThreshold = cms.double(1900.0),
-   RPixDummyROCElectronPerADC = cms.double(210.0),   # 210.0 to be verified 
+   RPixDummyROCElectronPerADC = cms.double(135.0),   # 210.0 to be verified 
    RPixDeadPixelProbability = cms.double(0.001),
    RPixDeadPixelSimulationOn = cms.bool(False),
 

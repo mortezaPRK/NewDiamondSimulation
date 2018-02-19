@@ -11,7 +11,7 @@ from Geometry.TrackerNumberingBuilder.trackerTopology_cfi import *
 from RecoMuon.DetLayers.muonDetLayerGeometry_cfi import *
 
 #CTPPS
-from Configuration.Geometry.geometry_CTPPS_cfi import *
+from Geometry.VeryForwardGeometry.geometry_CTPPS_cfi import *
 
 #  Calorimeters
 from Geometry.CaloEventSetup.CaloTopology_cfi import *

@@ -20,13 +20,13 @@
 
 //CTPPSHector headers
 #include "H_BeamLine.h"
-#include "H_RecRPObject.h"
 #include "H_BeamParticle.h"
 
 #include <string>
 #include <map>
 #include <cmath>
 #include <math.h>
+#include <tuple>
 
 #include "SimTransport/HectorProducer/interface/CTPPSHectorParameters.h"
 
@@ -34,6 +34,8 @@
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include <CLHEP/Vector/LorentzVector.h>
+#include <CLHEP/Vector/Boost.h>
+
 
 class TRandom3;
 
@@ -57,8 +59,6 @@ class CTPPSHector {
         void filterCTPPS(TRandom3*);
 
         // New function to calculate the LorentzBoost 
-        void LorentzBoost(LorentzVector& p_out, const string& frame);
-
         void set_BeamEnergy(double e) {fBeamEnergy=e;fBeamMomentum = sqrt(fBeamEnergy*fBeamEnergy - ProtonMassSQ);};
 
         double get_BeamEnergy() {return fBeamEnergy;};
@@ -76,6 +76,7 @@ class CTPPSHector {
 
         std::vector<LHCTransportLink> & getCorrespondenceMap() { return theCorrespondenceMap; }
 
+        bool SetBeamLine();
     private:
         // Defaults
         double lengthctpps ;
@@ -86,26 +87,30 @@ class CTPPSHector {
         bool m_smearE;
         double m_sigmaSTX;
         double m_sigmaSTY;
+        double m_sigmaSX;
+        double m_sigmaSY;
         float m_f_ctpps_f;
         float m_b_ctpps_b;	
 
         //HECTOR CTPPS Parameters
         bool fCrossAngleCorr;
-        double fCrossingAngle;
+        double fCrossingAngleBeam1;
+        double fCrossingAngleBeam2;
         double fBeamMomentum;
         double fBeamEnergy;
         double fVtxMeanX;
         double fVtxMeanY;
         double fVtxMeanZ;
         double fMomentumMin;
+        double fBeamXatIP;
+        double fBeamYatIP;
 
         edm::ESHandle < ParticleDataTable > pdt;
 
         // CTPPSHector
-        H_BeamLine * m_beamlineCTPPS1;
-        H_BeamLine * m_beamlineCTPPS2;	
-        H_RecRPObject * m_ctpps_f;
-        H_RecRPObject * m_ctpps_b; 
+        std::unique_ptr<H_BeamLine> m_beamlineCTPPS1;
+        std::unique_ptr<H_BeamLine> m_beamlineCTPPS2;
+
         std::map<unsigned int, H_BeamParticle*> m_beamPart;
         std::map<unsigned int, int> m_direct;
         std::map<unsigned int, bool> m_isStoppedctpps;
