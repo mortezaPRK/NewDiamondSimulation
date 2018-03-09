@@ -51,8 +51,7 @@ RawToDigi = cms.Sequence(L1TRawToDigi
                          +castorDigis
                          +scalersRawToDigi
                          +tcdsDigis
-                         +ctppsPixelDigis
-			 )
+                         )
 
 RawToDigi_noTk = cms.Sequence(L1TRawToDigi
                               +ecalDigis
@@ -64,9 +63,10 @@ RawToDigi_noTk = cms.Sequence(L1TRawToDigi
                               +castorDigis
                               +scalersRawToDigi
                               +tcdsDigis
-			      +ctppsPixelDigis
                               )
-    
+
+RawToDigi_pixelOnly = cms.Sequence(siPixelDigis)
+
 scalersRawToDigi.scalersInputTag = 'rawDataCollector'
 siPixelDigis.InputLabel = 'rawDataCollector'
 #false by default anyways ecalDigis.DoRegional = False
@@ -77,8 +77,6 @@ muonCSCDigis.InputObjects = 'rawDataCollector'
 muonDTDigis.inputLabel = 'rawDataCollector'
 muonRPCDigis.InputLabel = 'rawDataCollector'
 castorDigis.InputLabel = 'rawDataCollector'
-ctppsPixelDigis.InputLabel = 'ctppsPixelRawData'
-#ctppsPixelDigis.InputLabel = 'rawDataCollector'
 
 from Configuration.Eras.Modifier_run3_common_cff import run3_common
 run3_common.toReplaceWith(RawToDigi, RawToDigi.copyAndExclude([castorDigis]))

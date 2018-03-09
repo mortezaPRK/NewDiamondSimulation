@@ -423,14 +423,14 @@ bool CTPPSHector::SetBeamLine()
         if ( m_verbosity ) LogDebug("CTPPSHectorSetup") << "CTPPSHector: WARNING: lengthctpps=  " << lengthctpps;        
         return false;
     }
-    if (m_verbosity) {
+    //if (m_verbosity) {
           std::cout  << "====================================================================\n"
                      << "                  Forward beam line elements \n";
           m_beamlineCTPPS1->showElements();
           std::cout << "====================================================================\n"
                     << "                 Backward beam line elements \n";
           m_beamlineCTPPS2->showElements();
-    }
+    //}
 
     return true;
 }

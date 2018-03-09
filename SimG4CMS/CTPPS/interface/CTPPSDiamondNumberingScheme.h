@@ -10,7 +10,8 @@
 class CTPPSDiamondNumberingScheme : public CTPPSDiamondOrganization 
 {
   public:
-    CTPPSDiamondNumberingScheme(int i);
+    //CTPPSDiamondNumberingScheme(int i);
+    CTPPSDiamondNumberingScheme();
     ~CTPPSDiamondNumberingScheme();
 	 
     //  virtual unsigned int GetUnitID(const G4Step* aStep) const ;

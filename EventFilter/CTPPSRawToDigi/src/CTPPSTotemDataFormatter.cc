@@ -1,10 +1,8 @@
 /****************************************************************************
-*
-* This is a part of TOTEM offline software.
-* Authors:
-*   Jan Kašpar (jan.kaspar@gmail.com)
-*   Seyed Mohsen Etesami (setesami@cern.ch)
-****************************************************************************/
+ *
+ * This is a part of TOTEM offline software.
+ * Authors:
+ ****************************************************************************/
 
 #include "EventFilter/CTPPSRawToDigi/interface/CTPPSTotemDataFormatter.h"
 
@@ -16,323 +14,112 @@
 #include "DataFormats/CTPPSDetId/interface/CTPPSDiamondDetId.h"
 
 #include "EventFilter/CTPPSRawToDigi/interface/DiamondVFATFrame.h"
+#include "DataFormats/CTPPSDigi/interface/TotemRPDigi.h"
+#include "CondFormats/DataRecord/interface/TotemReadoutRcd.h"
 
 //----------------------------------------------------------------------------------------------------
 
 using namespace std;
 using namespace edm;
+using namespace ctppstotemobjects;
 
 //----------------------------------------------------------------------------------------------------
-
-CTPPSTotemDataFormatter::CTPPSTotemDataFormatter(const edm::ParameterSet &conf) :
-  verbosity(conf.getUntrackedParameter<unsigned int>("verbosity", 0)),
-  printErrorSummary(conf.getUntrackedParameter<unsigned int>("printErrorSummary", 1)),
-  printUnknownFrameSummary(conf.getUntrackedParameter<unsigned int>("printUnknownFrameSummary", 1)),
-
-  testFootprint(conf.getParameter<unsigned int>("testFootprint")),
-  testCRC(conf.getParameter<unsigned int>("testCRC")),
-  testID(conf.getParameter<unsigned int>("testID")),
-  testECMostFrequent(conf.getParameter<unsigned int>("testECMostFrequent")),
-  testBCMostFrequent(conf.getParameter<unsigned int>("testBCMostFrequent")),
-
-  EC_min(conf.getUntrackedParameter<unsigned int>("EC_min", 10)),
-  BC_min(conf.getUntrackedParameter<unsigned int>("BC_min", 10)),
-
-  EC_fraction(conf.getUntrackedParameter<double>("EC_fraction", 0.6)),
-  BC_fraction(conf.getUntrackedParameter<double>("BC_fraction", 0.6))
+CTPPSTotemDataFormatter::CTPPSTotemDataFormatter(std::map<TotemFramePosition, TotemVFATInfo> const &mapping)  :  theWordCounter(0), theDigiCounter(0), mapping_(mapping)
 {
-}
+  int s32 = sizeof(Word32);
+  int s64 = sizeof(Word64);
+  int s8  = sizeof(char);
+  if ( s8 != 1 || s32 != 4*s8 || s64 != 2*s32) {
+    LogError("UnexpectedSizes")
+      <<" unexpected sizes: "
+      <<"  size of char is: " << s8
+      <<", size of Word32 is: " << s32
+      <<", size of Word64 is: " << s64
+      <<", send exception" ;
+  }
 
+  allDetDigis = 0;
+  hasDetDigis = 0;
+}
 //----------------------------------------------------------------------------------------------------
-
-void CTPPSTotemDataFormatter::RunCommon(const VFATFrameCollection &input, const TotemDAQMapping &mapping,
-      map<TotemFramePosition, CTPPSTotemDataFormatter::Record> &records)
+void CTPPSTotemDataFormatter::formatRawData(unsigned int lvl1_ID, RawData & fedRawData, const 
+    Digis & digis, std::map<std::map<const uint32_t, unsigned int>, std::map<short unsigned int, short unsigned int>> iDdet2fed)
+//void CTPPSTotemDataFormatter::formatRawData(unsigned int lvl1_ID, RawData & fedRawData, const 
+//    Digis & digis, std::map<std::map<const uint32_t, unsigned int>, std::map<short unsigned int, short unsigned int>> iDdet2fed,  std::map<TotemFramePosition, CTPPSTotemDigiToRaw::Record> &record)
 {
-  // EC and BC checks (wrt. the most frequent value), BC checks per subsystem
-  CounterChecker ECChecker(CounterChecker::ECChecker, "EC", EC_min, EC_fraction, verbosity);
-  CounterChecker BCChecker(CounterChecker::BCChecker, "BC", BC_min, BC_fraction, verbosity);
+  std::map<int, vector<Word32> > words;
+  for (Digis::const_iterator im = digis.begin(); im != digis.end(); im++) {
+    allDetDigis++;
+    cms_uint32_t rawId = im->first;
+    edm::LogInfo("--- RPSi") << " \t\t digi rawId = " << rawId;
+    //std::cout << " \t digi rawId = " << rawId <<  " - theDigiCounter = " << theDigiCounter << std::endl; //" ---- TotemRPDetID = " << TotemRPDetId(rawId) << std::endl; 
+    hasDetDigis++;
+    const DetDigis & detDigis = im->second;
+    for (DetDigis::const_iterator it = detDigis.begin(); it != detDigis.end(); it++) {
+      theDigiCounter++;
+      const TotemRPDigi & digi = (*it);
+      int chipPosition = -9;  
+      const int nCH = 128; 	
+      int nStrip = digi.getStripNumber();  
+      //std::cout << " \t\t  StripNumber  = " << nStrip << "  "  << theDigiCounter << std::endl;
+      if (nStrip<= nCH ) chipPosition = 0; //std::cout << " \t\t  StripNumber  = " << nStrip << "  "  << theDigiCounter << " chipPosition = 0 - ch = " <<  nStrip<<  std::endl; 
+      if (nStrip> nCH && nStrip<= 2*nCH ) chipPosition = 1; // std::cout << " \t\t  StripNumber  = " << nStrip << "  "  << theDigiCounter << " chipPosition = 1 - ch = " <<  (nStrip-nCH)  << std::endl; 
+      if (nStrip> 2*nCH && nStrip<= 3*nCH ) chipPosition = 2; //std::cout << " \t\t  StripNumber  = " << nStrip << "  "  << theDigiCounter << " chipPosition = 2 - ch = " <<  (nStrip-2*nCH) << std::endl; 
+      if (nStrip> 3*nCH ) chipPosition = 3; //std::cout << " \t\t  StripNumber  = " << nStrip << "  "  << theDigiCounter << " chipPosition = 3 - ch = " <<  (nStrip-3*nCH)  << std::endl; 
+      //channel form DIGI		
+      int channel = nStrip - chipPosition*nCH; 
+	
+     //std::cout << "----------------  channel = " << channel << std::endl;  		
+      for (auto &p : iDdet2fed) {
+	for (auto &pf : p.first){
+	  cms_uint32_t pfrawId = pf.first;
+	  TotemRPDetId chipId(pfrawId);
+          int hwid = pf.second; 
+	    //uint8_t chipPosition = chipId.chip();
+            //unsigned short offset = chipPosition * 128;
+	    //std::cout <<  " \t\t\t\t---  pfrawId = " << pf.first << " - chipPosition = " << unsigned(chipPosition) << " - offset = " << offset  <<  " - chipId =  " << chipId << std::endl;
+	    cms_uint32_t newrawId = rawId+8192*chipPosition; 
 
-  // initialise structure merging vfat frame data with the mapping
-  for (auto &p : mapping.VFATMapping)
-  {
-    TotemVFATStatus st;
-    st.setMissing(true);
-    records[p.first] = { &p.second, NULL,  st };
-  }
-
-  // event error message buffer
-  stringstream ees;
-
-  // associate data frames with records
-  for (VFATFrameCollection::Iterator fr(&input); !fr.IsEnd(); fr.Next())
-  {
-    // frame error message buffer
-    stringstream fes;
-
-    bool problemsPresent = false;
-    bool stopProcessing = false;
-
-    // skip data frames not listed in the DAQ mapping
-    auto records_it = records.find(fr.Position());
-    if (records_it == records.end())
-    {
-      unknownSummary[fr.Position()]++;
-      continue;
-    }
-
-    // update record
-    Record &record = records_it->second;
-    record.frame = fr.Data();
-    record.status.setMissing(false);
-    record.status.setNumberOfClustersSpecified(record.frame->isNumberOfClustersPresent());
-    record.status.setNumberOfClusters(record.frame->getNumberOfClusters());
-
-    // check footprint
-    if (testFootprint != tfNoTest && !record.frame->checkFootprint())
-    {
-      problemsPresent = true;
-
-      if (verbosity > 0)
-        fes << "    invalid footprint" << endl;
-
-      if ((testFootprint == tfErr))
-      {
-        record.status.setFootprintError();
-        stopProcessing = true;
+	    if (pfrawId == newrawId){
+	    //std::cout <<  " \n\t\t\t---  pfrawId = " << pf.first << " - chipPosition = " << chipPosition <<  " newRawID =  " << newrawId << " RAWiDoRIGINAL = " << rawId  << " detId" << pf.first << " hwid = "  << pf.second << endl ; 
+		for (auto &ps : p.second){
+	            int idxInFiber = ps.second; 		
+		    //std::cout <<  " \t\t\t\t ---  channel =  " << channel <<  " hwid = " << pf.second << " newRawID =  " << newrawId << " FedId = " << ps.first << " - IdxInFiber = " << ps.second << std::endl;
+	 	     Word64 word = 
+  			(idxInFiber<< 0 ) 
+			| (channel << 9 ) 
+			| (rawId   << 10)  		
+			| ( 0      << 11)  			
+			| ( 0      << 12);  			
+	//std::cout << " word  = " <<  print(word) << " ++++++++++++++++++++++++ " << std::endl;
+		}
+	   }//rawId
+	} 
       }
-    }
 
-    // check CRC
-    if (testCRC != tfNoTest && !record.frame->checkCRC())
-    {
-      problemsPresent = true;
-
-      if (verbosity > 0)
-        fes << "    CRC failure" << endl;
-
-      if (testCRC == tfErr)
-      {
-        record.status.setCRCError();
-        stopProcessing = true;
-      }
-    }
-    // check the id mismatch
-    if (testID != tfNoTest && record.frame->isIDPresent() && (record.frame->getChipID() & 0xFFF) != (record.info->hwID & 0xFFF))
-    {
-      if (verbosity > 0)
-        fes << "    ID mismatch (data: 0x" << hex << record.frame->getChipID()
-          << ", mapping: 0x" << record.info->hwID  << dec << ", symbId: " << record.info->symbolicID.symbolicID << ")" << endl;
-
-      if (testID == tfErr)
-      {
-        record.status.setIDMismatch();
-        stopProcessing = true;
-      }
-    }
-
-    // if there were errors, put the information to ees buffer
-    if (verbosity > 0 && problemsPresent)
-    {
-      string message = (stopProcessing) ? "(and will be dropped)" : "(but will be used though)";
-      if (verbosity > 2)
-      {
-        ees << "  Frame at " << fr.Position() << " seems corrupted " << message << ":" << endl;
-        ees << fes.rdbuf();
-      } else
-        ees << "  Frame at " << fr.Position() << " seems corrupted " << message << "." << endl;
-    }
-
-    // if there were serious errors, do not process this frame
-    if (stopProcessing)
-      continue;
-
-    // fill EC and BC values to the statistics
-    if (fr.Data()->isECPresent())
-      ECChecker.Fill(fr.Data()->getEC(), fr.Position());
-
-    if (fr.Data()->isBCPresent())
-      BCChecker.Fill(fr.Data()->getBC(), fr.Position());
-  }
-
-  // analyze EC and BC statistics
-  if (testECMostFrequent != tfNoTest)
-    ECChecker.Analyze(records, (testECMostFrequent == tfErr), ees);
-
-  if (testBCMostFrequent != tfNoTest)
-    BCChecker.Analyze(records, (testBCMostFrequent == tfErr), ees);
-
-  // add error message for missing frames
-  if (verbosity > 1)
-  {
-    for (const auto &p : records)
-    {
-      if (p.second.status.isMissing())
-        ees << "Frame for VFAT " << p.first << " is not present in the data." << endl;
-    }
-  }
-
-  // print error message
-  if (verbosity > 0 && !ees.rdbuf()->str().empty())
-  {
-    if (verbosity > 1)
-      LogWarning("Totem") << "Error in CTPPSTotemDataFormatter::RunCommon > " << "event contains the following problems:" << endl << ees.rdbuf() << endl;
-    else
-      LogWarning("Totem") << "Error in CTPPSTotemDataFormatter::RunCommon > " << "event contains problems." << endl;
-  }
-
-  // increase error counters
-  if (printErrorSummary)
-  {
-    for (const auto &it : records)
-    {
-      if (!it.second.status.isOK())
-      {
-        auto &m = errorSummary[it.first];
-        m[it.second.status]++;
-      }
-    }
-  }
+    }//detDigis
+    //std::cout << " theDigiCounter = " << theDigiCounter << std::endl; 
+  }//digis
 }
 
-//----------------------------------------------------------------------------------------------------
-
-void CTPPSTotemDataFormatter::formatRawData(const VFATFrameCollection &input,
-  const TotemDAQMapping &mapping, const TotemAnalysisMask &analysisMask,
-  DetSetVector<TotemRPDigi> &rpData, DetSetVector<TotemVFATStatus> &finalStatus)
+std::string CTPPSTotemDataFormatter::print(const  Word64 & word) const
 {
-  // structure merging vfat frame data with the mapping
-  map<TotemFramePosition, Record> records;
-
-  // common processing - frame validation
-  RunCommon(input, mapping, records);
-
-  // second loop over data
-  for (auto &p : records)
-  {
-    Record &record = p.second;
-
-    // calculate ids
-    TotemRPDetId chipId(record.info->symbolicID.symbolicID);
-    uint8_t chipPosition = chipId.chip();
-    TotemRPDetId detId = chipId.getPlaneId();
-
-    // update chipPosition in status
-    record.status.setChipPosition(chipPosition);
-
-    // produce digi only for good frames
-    if (record.status.isOK())
-    {
-      // find analysis mask (needs a default=no mask, if not in present the mapping)
-      TotemVFATAnalysisMask anMa;
-      anMa.fullMask = false;
-
-      auto analysisIter = analysisMask.analysisMask.find(record.info->symbolicID);
-      if (analysisIter != analysisMask.analysisMask.end())
-      {
-        // if there is some information about masked channels - save it into conversionStatus
-        anMa = analysisIter->second;
-        if (anMa.fullMask)
-          record.status.setFullyMaskedOut();
-        else
-          record.status.setPartiallyMaskedOut();
-      }
-
-      // create the digi
-      unsigned short offset = chipPosition * 128;
-      const vector<unsigned char> &activeChannels = record.frame->getActiveChannels();
-
-      for (auto ch : activeChannels)
-      {
-        // skip masked channels
-        if (!anMa.fullMask && anMa.maskedChannels.find(ch) == anMa.maskedChannels.end())
-        {
-          DetSet<TotemRPDigi> &digiDetSet = rpData.find_or_insert(detId);
-          digiDetSet.push_back(TotemRPDigi(offset + ch));
-        }
-      }
-    }
-
-    // save status
-    DetSet<TotemVFATStatus> &statusDetSet = finalStatus.find_or_insert(detId);
-    statusDetSet.push_back(record.status);
-  }
+  ostringstream str;
+  str  <<"word64:  " << reinterpret_cast<const bitset<64>&> (word);
+  return str.str();
 }
-
-//----------------------------------------------------------------------------------------------------
-
-void CTPPSTotemDataFormatter::formatRawData(const VFATFrameCollection &coll, const TotemDAQMapping &mapping, const TotemAnalysisMask &mask,
-      edm::DetSetVector<CTPPSDiamondDigi> &digi, edm::DetSetVector<TotemVFATStatus> &status)
-{
-  // structure merging vfat frame data with the mapping
-  map<TotemFramePosition, Record> records;
-
-  // common processing - frame validation
-  RunCommon(coll, mapping, records);
-
-  // second loop over data
-  for (auto &p : records)
-  {
-    Record &record = p.second;
-
-    // calculate ids
-    CTPPSDiamondDetId detId(record.info->symbolicID.symbolicID);
-
-    if (record.status.isOK())
-    {
-      const VFATFrame *fr = record.frame;
-      DiamondVFATFrame *diamondframe = (DiamondVFATFrame*) fr;
-
-      // update Event Counter in status
-      record.status.setEC(record.frame->getEC() & 0xFF);
-
-      // create the digi
-      DetSet<CTPPSDiamondDigi> &digiDetSet = digi.find_or_insert(detId);
-      digiDetSet.push_back(CTPPSDiamondDigi(diamondframe->getLeadingEdgeTime(),diamondframe->getTrailingEdgeTime(),diamondframe->getThresholdVoltage(),diamondframe->getMultihit(),diamondframe->getHptdcErrorFlag()));
-    }
-
-    // save status
-    DetSet<TotemVFATStatus> &statusDetSet = status.find_or_insert(detId);
-    statusDetSet.push_back(record.status);
-  }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void CTPPSTotemDataFormatter::PrintSummaries() const
-{
-  // print error summary
-  if (printErrorSummary)
-  {
-    if (errorSummary.size() > 0)
-    {
-      stringstream ees;
-      for (const auto &vit : errorSummary)
-      {
-        ees << vit.first << endl;
-
-        for (const auto &it : vit.second)
-          ees << "    " << it.first << " : " << it.second << endl;
-      }
-
-      LogWarning("Totem") << "CTPPSTotemDataFormatter: error summary (error signature : number of such events)\n" << endl << ees.rdbuf();
-    } else {
-      LogInfo("Totem") << "CTPPSTotemDataFormatter: no errors to be reported.";
-    }
-  }
-
-  // print summary of unknown frames (found in data but not in the mapping)
-  if (printUnknownFrameSummary)
-  {
-    if (unknownSummary.size() > 0)
-    {
-      stringstream ees;
-      for (const auto &it : unknownSummary)
-        ees << "  " << it.first << " : " << it.second << endl;
-
-      LogWarning("Totem") << "CTPPSTotemDataFormatter: frames found in data, but not in the mapping (frame position : number of events)\n"
-        << endl << ees.rdbuf();
-    } else {
-      LogInfo("Totem") << "CTPPSTotemDataFormatter: no unknown frames to be reported.";
-    }
-  }
-}
+//---------------------------------------------------------------------------------------------------
+//iDdet2fed (detId,hwID;FedId,IdxInFiber)
+/*
+ * Raw data frame as sent by electronics.
+ * The container is organized as follows (reversed Figure 8 at page 23 of VFAT2 manual):
+ * \verbatim
+ * buffer index   content       size
+ * ---------------------------------------------------------------
+ *   0            CRC           16 bits
+ *   1->8         Channel data  128 bits, channel 0 first
+ *   9            ChipID        4 constant bits (1110) + 12 bits
+ *   10           EC, Flags     4 constant bits (1100) + 8, 4 bits
+ *   11           BC            4 constant bits (1010) + 12 bits
+ * \endverbatim
+ */

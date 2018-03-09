@@ -46,7 +46,6 @@
 #include <map>
 
 class FEDRawData;
-//class CTPPSPixelDAQMapping;
 
 class CTPPSPixelDataFormatter {
 
@@ -72,8 +71,8 @@ void formatRawData( unsigned int lvl1_ID, RawData & fedRawData, const Digis & di
 
 private:
 
-  mutable int theWordCounter;
-  mutable int theDigiCounter;
+  int theWordCounter;
+  int theDigiCounter;
 
   RPixErrorChecker errorcheck;
 

@@ -14,8 +14,10 @@
 #include "CondFormats/CTPPSReadoutObjects/interface/TotemDAQMapping.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/CTPPSDigi/interface/TotemRPDigi.h"
+#include "DataFormats/CTPPSDetId/interface/TotemRPDetId.h"
 #include "CondFormats/CTPPSReadoutObjects/interface/TotemFramePosition.h"
-
+#include "EventFilter/CTPPSRawToDigi/interface/VFATFrameCollection.h"
+#include "DataFormats/CTPPSDigi/interface/TotemVFATStatus.h"
 
 class CTPPSTotemDigiToRaw final : public edm::EDProducer {
 public:
@@ -44,8 +46,15 @@ private:
   edm::ESWatcher<TotemReadoutRcd> recordWatcher;
   bool debug;
   edm::EDGetTokenT<edm::DetSetVector<TotemRPDigi>> tTotemRPDigi; 
-  std::map< std::map<const uint32_t, short unsigned int> ,  std::map<short unsigned int, short unsigned int>  > iDdet2fed_;
+  std::map<std::map<const uint32_t, unsigned int>, std::map<short unsigned int, short unsigned int>> iDdet2fed_;
   TotemFramePosition fPos_;
+
+ struct Record
+    {
+      const TotemVFATInfo *info;
+      const VFATFrame *frame;
+      TotemVFATStatus status;
+    };
 
 };
 #endif

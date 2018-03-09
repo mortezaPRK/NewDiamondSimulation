@@ -38,27 +38,27 @@ class CTPPS_Diamond_SD : public SensitiveTkDetector,
     public Observer<const EndOfEvent*>
 {
   public:    
-    CTPPS_Diamond_SD(std::string, const DDCompactView &, const SensitiveDetectorCatalog &,
+    CTPPS_Diamond_SD(const std::string &, const DDCompactView &, const SensitiveDetectorCatalog &,
     edm::ParameterSet const &,const SimTrackManager*);
-    virtual ~CTPPS_Diamond_SD();
+    ~CTPPS_Diamond_SD() override;
     void Print_Hit_Info();
  
-    void Initialize(G4HCofThisEvent * HCE);
-    virtual void EndOfEvent(G4HCofThisEvent * eventHC);
-    void clear();
+    void Initialize(G4HCofThisEvent * HCE) override;
+    void EndOfEvent(G4HCofThisEvent * eventHC) override;
+    void clear() override;
     void cleartrack();
     void clearTrack(G4Track * Track);
-    void DrawAll();
-    void PrintAll(); 
-    void fillHits(edm::PSimHitContainer&, std::string use);
+    void DrawAll() override;
+    void PrintAll() override; 
+    void fillHits(edm::PSimHitContainer&, const std::string &) override;
  
   private:
-    virtual void clearHits();
-    virtual G4bool ProcessHits(G4Step * step, G4TouchableHistory * tHistory);
-    virtual uint32_t setDetUnitId(G4Step * step);
-    virtual void update(const BeginOfEvent *);
-    virtual void update (const ::EndOfEvent*);
-    virtual void initRun();
+    void clearHits() override;
+    bool ProcessHits(G4Step * step, G4TouchableHistory * tHistory) override;
+    uint32_t setDetUnitId(const G4Step * step);
+    void update(const BeginOfEvent *) override;
+    void update (const ::EndOfEvent*) override;
+    void initRun();
     void SetNumberingScheme(CTPPSVDetectorOrganization* scheme);
 
     TrackingSlaveSD* slave;

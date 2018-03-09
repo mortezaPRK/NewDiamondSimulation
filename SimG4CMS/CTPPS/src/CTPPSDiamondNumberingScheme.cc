@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-CTPPSDiamondNumberingScheme::CTPPSDiamondNumberingScheme(int i)
+CTPPSDiamondNumberingScheme::CTPPSDiamondNumberingScheme()
 {
   edm::LogInfo("Diamond") << " Creating CTPPSDiamondNumberingScheme" << std::endl;
 }

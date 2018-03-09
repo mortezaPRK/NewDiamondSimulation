@@ -10,10 +10,10 @@ LHCTransport = cms.EDProducer("CTPPSHectorProducer",
     Verbosity = cms.bool(False),
     CTPPSHector = cms.PSet(
         HectorEtaCut,
-        Nominal_TDR,
+        Nominal_TDR, #Validated_PreTS2_2016, #Nominal_2017_beta40cm,
         BeamLineLengthCTPPS = cms.double(250.0),
-        CTPPSf = cms.double(203.827),    ##in meters
-        CTPPSb = cms.double(203.827),    ##in meters
+        CTPPSf = cms.double(212.55),    ##in meters
+        CTPPSb = cms.double(212.55),    ##in meters
         smearEnergy = cms.bool(True),       ## if False: no Energy smearing(i.e. sigmaEnergy =0.0)
         smearAng = cms.bool(True),       ## if False: no Angle smearing(i.e. sigmaSTX(Y) =0.0)
         CrossAngleCorr = cms.bool(True),

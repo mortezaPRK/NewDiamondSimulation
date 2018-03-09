@@ -68,8 +68,7 @@ void CTPPSPixelRawToDigi::produce( edm::Event& ev,
 
 
   if(data_exist){
-  //es.get<CTPPSPixelDAQMappingRcd>().get( mapping);
-  es.get<CTPPSPixelDAQMappingRcd>().get(mappingLabel_, mapping);
+  es.get<CTPPSPixelDAQMappingRcd>().get( mapping);
 
 
     fedIds_   = mapping->fedIds();
@@ -81,6 +80,7 @@ void CTPPSPixelRawToDigi::produce( edm::Event& ev,
       int fedId = *aFed;
       
       edm::LogInfo("CTPPSPixelRawToDigi")<< " PRODUCE DIGI FOR FED: " <<  dec <<fedId << endl;
+
 /// get event data for this fed
       const FEDRawData& fedRawData = buffers->FEDData( fedId );
       

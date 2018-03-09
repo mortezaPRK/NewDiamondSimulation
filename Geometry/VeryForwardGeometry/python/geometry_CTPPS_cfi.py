@@ -85,7 +85,6 @@ ctppsDiamondGeomXMLFiles = cms.vstring(
         'Geometry/VeryForwardData/data/CTPPS_Diamond_Materials.xml',
         'Geometry/VeryForwardData/data/CTPPS_Diamond_Transformations.xml',
         'Geometry/VeryForwardData/data/CTPPS_Diamond_X_Distance.xml',
-        'Geometry/VeryForwardData/data/CTPPS_Diamond_Sensitive_Dets.xml',
         'Geometry/VeryForwardData/data/CTPPS_Diamond_Parameters.xml',
         'Geometry/VeryForwardData/data/CTPPS_Timing_Station_Parameters.xml',
         'Geometry/VeryForwardData/data/CTPPS_Timing_Horizontal_Pot.xml',

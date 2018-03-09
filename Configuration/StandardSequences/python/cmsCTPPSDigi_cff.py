@@ -20,10 +20,11 @@ from SimCalorimetry.Configuration.SimCalorimetry_cff import *
 #
 from SimMuon.Configuration.SimMuon_cff import *
 #
-# CTPPS Digis (now only Pixel)
+# CTPPS Digis 
 # returns sequence "ctppsDigi"
 #
 from SimCTPPS.Configuration.SimCTPPS_cff import *
+# 
 #
 # TrackingParticle Producer is now part of the mixing module, so
 # it is no longer run here.
@@ -36,7 +37,6 @@ from GeneratorInterface.Core.generatorSmeared_cfi import *
 from SimGeneral.PileupInformation.genPUProtons_cfi import *
 
 doAllDigi = cms.Sequence(generatorSmeared*calDigi+muonDigi+ctppsDigi)
-
 pdigi = cms.Sequence(generatorSmeared*fixGenInfo*cms.SequencePlaceholder("randomEngineStateProducer")*cms.SequencePlaceholder("mix")*doAllDigi*addPileupInfo*genPUProtons)
 pdigi_valid = cms.Sequence(pdigi)
 pdigi_nogen=cms.Sequence(generatorSmeared*cms.SequencePlaceholder("randomEngineStateProducer")*cms.SequencePlaceholder("mix")*doAllDigi*addPileupInfo*genPUProtons)
@@ -47,12 +47,14 @@ pdigi_hi=cms.Sequence(pdigi+heavyIon)
 pdigi_hi_nogen=cms.Sequence(pdigi_nogen+heavyIon)
 
 from Configuration.Eras.Modifier_fastSim_cff import fastSim
-if fastSim.isChosen():
+def _fastSimDigis(process):
+    import FastSimulation.Configuration.DigiAliases_cff as DigiAliases
+
     # pretend these digis have been through digi2raw and raw2digi, by using the approprate aliases
     # use an alias to make the mixed track collection available under the usual label
     from FastSimulation.Configuration.DigiAliases_cff import loadDigiAliases
-    loadDigiAliases(premix = False)
-    from FastSimulation.Configuration.DigiAliases_cff import generalTracks,ecalPreshowerDigis,ecalDigis,hcalDigis,muonDTDigis,muonCSCDigis,muonRPCDigis,ctppsPixelDigis
+    loadDigiAliases(process)
+modifyDigi_fastSimDigis = fastSim.makeProcessModifier(_fastSimDigis)
 
 #phase 2 common mods
 def _modifyEnableHcalHardcode( theProcess ):

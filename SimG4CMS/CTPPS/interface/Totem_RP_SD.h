@@ -32,7 +32,9 @@
 
 class G4Step;
 class G4HCofThisEvent;
+
 class TrackingSlaveSD;
+class SimTrackManager;
 //class FrameRotation;
 class TotemTestHitHBNtuple;
 
@@ -41,26 +43,26 @@ class Totem_RP_SD : public SensitiveTkDetector,
     public Observer<const EndOfEvent*>
 {
  public:    
-  Totem_RP_SD(std::string, const DDCompactView &, const SensitiveDetectorCatalog &,
+  Totem_RP_SD(const std::string &, const DDCompactView &, const SensitiveDetectorCatalog &,
     edm::ParameterSet const &,const SimTrackManager*);
-  virtual ~Totem_RP_SD();
+  ~Totem_RP_SD() override;
   
   void Print_Hit_Info();
 
-  void Initialize(G4HCofThisEvent * HCE);
-  virtual void EndOfEvent(G4HCofThisEvent * eventHC);
-  void clear();
-  void DrawAll();
-  void PrintAll();
+  void Initialize(G4HCofThisEvent * HCE) override;
+  void EndOfEvent(G4HCofThisEvent * eventHC) override;
+  void clear() override;
+  void DrawAll() override;
+  void PrintAll() override;
   
-  void fillHits(edm::PSimHitContainer&, std::string use);
+  void fillHits(edm::PSimHitContainer&, const std::string &) override;
 
  private:
-  virtual void clearHits();
-  virtual G4bool ProcessHits(G4Step * step, G4TouchableHistory * tHistory);
-  virtual uint32_t setDetUnitId(G4Step * step);
-  virtual void update(const BeginOfEvent *);
-  virtual void update (const ::EndOfEvent*);
+  void clearHits() override;
+  bool ProcessHits(G4Step * step, G4TouchableHistory * tHistory) override;
+  uint32_t setDetUnitId(const G4Step * step);
+  void update(const BeginOfEvent *) override;
+  void update (const ::EndOfEvent*) override;
   
   void SetNumberingScheme(TotemRPVDetectorOrganization* scheme);
 

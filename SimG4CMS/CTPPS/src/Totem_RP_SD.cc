@@ -13,7 +13,6 @@
 
 #include "SimG4Core/Notification/interface/TrackInformation.h"
 #include "SimG4Core/Notification/interface/G4TrackToParticleID.h"
-//#include "SimG4Core/Geometry/interface/SDCatalog.h"
 #include "SimG4Core/Geometry/interface/SensitiveDetectorCatalog.h"
 #include "SimG4Core/Physics/interface/G4ProcessTypeEnumerator.h"
 
@@ -22,8 +21,6 @@
 #include "SimDataFormats/TrackingHit/interface/UpdatablePSimHit.h"
 #include "SimDataFormats/SimHitMaker/interface/TrackingSlaveSD.h"
 
-//#include "Geometry/Vector/interface/LocalPoint.h"
-//#include "Geometry/Vector/interface/LocalVector.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
 
@@ -40,11 +37,10 @@
 #include <string>
 
 
-Totem_RP_SD::Totem_RP_SD(std::string name, const DDCompactView & cpv, const SensitiveDetectorCatalog & clg,
-     edm::ParameterSet const & p, const SimTrackManager* manager) : 
+Totem_RP_SD::Totem_RP_SD(const std::string & name, const DDCompactView & cpv, const SensitiveDetectorCatalog & clg,edm::ParameterSet const & p, const SimTrackManager * manager) : 
   SensitiveTkDetector(name, cpv, clg, p), 
   numberingScheme(0),  
-  name(name), hcID(-1), theHC(0), currentHit(0), theTrack(0), currentPV(0), 
+  hcID(-1), theHC(0), currentHit(0), theTrack(0), currentPV(0), 
   unitID(0),  preStepPoint(0), postStepPoint(0), eventno(0)
 {
   collectionName.insert(name);
@@ -52,12 +48,6 @@ Totem_RP_SD::Totem_RP_SD(std::string name, const DDCompactView & cpv, const Sens
   edm::ParameterSet m_Anal = p.getParameter<edm::ParameterSet>("Totem_RP_SD");
   verbosity_ = m_Anal.getParameter<int>("Verbosity");
   
-  edm::LogInfo("TotemRP") << "*******************************************************" << std::endl;
-  edm::LogInfo("TotemRP") << "*                                                     *" << std::endl;
-  edm::LogInfo("TotemRP") << "* Constructing a Totem_RP_SD  with name " << name             << std::endl;  
-  edm::LogInfo("TotemRP") << "*                                                     *" << std::endl;
-  edm::LogInfo("TotemRP") << "*******************************************************" << std::endl;
-
   std::cout 
     << "*******************************************************\n"
     << "*                                                     *\n"
@@ -68,26 +58,11 @@ Totem_RP_SD::Totem_RP_SD(std::string name, const DDCompactView & cpv, const Sens
   
 
   slave  = new TrackingSlaveSD(name);
-
-  //
-  // Now attach the right detectors (LogicalVolumes) to me
-  //
-  
-  //std::vector<std::string> lvNames = SensitiveDetectorCatalog::instance()->logicalNames(name);
-  std::vector<std::string> lvNames = clg.logicalNames(name);
-  this->Register();
-  for (std::vector<std::string>::iterator it=lvNames.begin();  it !=lvNames.end(); it++)
-  {
-    this->AssignSD(*it);
-    edm::LogInfo("TotemRP") << "Totem_RP_SD : Assigns SD to LV " << (*it);
-  }
   
   if (name == "TotemHitsRP")
   {
     numberingScheme = dynamic_cast<TotemRPVDetectorOrganization*>(new myRPNumberingScheme(3));
-  }
-  else 
-  {
+  } else {
     edm::LogWarning("TotemRP") << "Totem_RP_SD: ReadoutName not supported\n";
   }
   
@@ -97,23 +72,20 @@ Totem_RP_SD::Totem_RP_SD(std::string name, const DDCompactView & cpv, const Sens
 
 Totem_RP_SD::~Totem_RP_SD()
 { 
-  if (slave)
     delete slave; 
-  if (numberingScheme)
     delete numberingScheme;
 }
 
 void Totem_RP_SD::Initialize(G4HCofThisEvent * HCE) {
   LogDebug("TotemRP") << "Totem_RP_SD : Initialize called for " << name;
 
-  theHC = new Totem_RP_G4HitCollection(name, collectionName[0]);
+  theHC = new Totem_RP_G4HitCollection(GetName(), collectionName[0]);
   G4SDManager::GetSDMpointer()->AddNewCollection(name, collectionName[0]);
- 
+
   if (hcID<0) 
     hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
   HCE->AddHitsCollection(hcID, theHC);
 }
-
 
 void Totem_RP_SD::Print_Hit_Info()
 {
@@ -154,14 +126,15 @@ void Totem_RP_SD::Print_Hit_Info()
 }
 
 
-G4bool Totem_RP_SD::ProcessHits(G4Step * aStep, G4TouchableHistory * )
+bool Totem_RP_SD::ProcessHits(G4Step * aStep, G4TouchableHistory * )
 {
   if (aStep == NULL)
   {	    
     return true;
-  }  else {
+  } else {
     GetStepInfo(aStep);
     //Print_Hit_Info();
+ 
     CreateNewHit();
     return true;
   }
@@ -170,30 +143,19 @@ G4bool Totem_RP_SD::ProcessHits(G4Step * aStep, G4TouchableHistory * )
 
 void Totem_RP_SD::GetStepInfo(G4Step* aStep)
 {
-  preStepPoint = aStep->GetPreStepPoint();
+  preStepPoint = aStep->GetPreStepPoint(); 
   postStepPoint = aStep->GetPostStepPoint(); 
   theTrack = aStep->GetTrack();   
-//  theLocalEntryPoint = SensitiveDetector::InitialStepPosition(aStep,LocalCoordinates);  
-//  theLocalExitPoint = SensitiveDetector::FinalStepPosition(aStep,LocalCoordinates);
   hitPoint = preStepPoint->GetPosition();
   exitPoint = postStepPoint->GetPosition();
   currentPV = preStepPoint->GetPhysicalVolume();
   theLocalEntryPoint = SetToLocal(hitPoint);
   theLocalExitPoint = SetToLocal(exitPoint);
 
-// double weight = 1; 
+
   G4String name = currentPV->GetName();
   name.assign(name,0,4);
-//  if(name == "EBRY" || name == "EFRY")
-//   {
-//     weight = LY_curve(name, hitPoint);
-//  }
-//  TrackInformation * trkInfo =
-//  (TrackInformation *)(theTrack->GetUserInformation());
   G4String particleType = theTrack->GetDefinition()->GetParticleName();
-//  if (particleType == "e-" ||
-//    particleType == "e+" ||
-//    particleType == "gamma" ){
   tSlice = (postStepPoint->GetGlobalTime() )/nanosecond;
   tSliceID = (int) tSlice;
   unitID = setDetUnitId(aStep);
@@ -221,10 +183,6 @@ void Totem_RP_SD::GetStepInfo(G4Step* aStep)
   ThetaAtEntry = lnmd.theta();
   PhiAtEntry = lnmd.phi();
 
-//  ThetaAtEntry     = aStep->GetPreStepPoint()->GetPosition().theta()/deg;
-//  PhiAtEntry       = aStep->GetPreStepPoint()->GetPosition().phi()/deg;
-
-//  LogDebug("TotemRP") << "UUUUUUUNNNNNNNNNNIIIIIIIIIITTTTTTTTTTTTTIIIIDDDD " << 
 //    numberingScheme->GetUnitID(aStep) << std::endl ;
   if(IsPrimary(theTrack))
     ParentId = 0;
@@ -236,10 +194,8 @@ void Totem_RP_SD::GetStepInfo(G4Step* aStep)
 }
 
 
-uint32_t Totem_RP_SD::setDetUnitId(G4Step * aStep)
+uint32_t Totem_RP_SD::setDetUnitId(const G4Step * aStep)
 { 
-//  LogDebug("TotemRP")<< "ALL'INTERNO DI SETDETUNITID PER IL DETECTOR "<< name << std::endl;
-//  LogDebug("TotemRP") << "PIANO " << numberingScheme->GetCurrentPlane()<<std::endl;
   return (numberingScheme == 0 ? 0 : numberingScheme->GetUnitID(aStep));
 }
 
@@ -247,13 +203,11 @@ uint32_t Totem_RP_SD::setDetUnitId(G4Step * aStep)
 void Totem_RP_SD::StoreHit(Totem_RP_G4Hit* hit)
 {
   if (hit == 0 )
-
   {
     if(verbosity_)
       LogDebug("TotemRP") << "Totem_RP_SD: hit to be stored is NULL !!" <<std::endl;
     return;
   }
-
   theHC->insert( hit );
 }
 
@@ -265,7 +219,7 @@ void Totem_RP_SD::CreateNewHit()
   double outrangeY = hitPoint.y();
   if (fabs(outrangeX)>40.) return;
   if (fabs(outrangeY)>40.) return;
-// end protection 
+// end protection
 
   currentHit = new Totem_RP_G4Hit;
   currentHit->setTrackID(primaryID);
@@ -304,7 +258,6 @@ G4ThreeVector Totem_RP_SD::SetToLocal(G4ThreeVector global)
   G4ThreeVector localPoint;
   const G4VTouchable* touch= preStepPoint->GetTouchable();
   localPoint = touch->GetHistory()->GetTopTransform().TransformPoint(global);
-  
   return localPoint;
 }
      
@@ -315,8 +268,6 @@ void Totem_RP_SD::EndOfEvent(G4HCofThisEvent* )
   for (int j=0; j<theHC->entries() && j<15000; j++)
   {
     Totem_RP_G4Hit* aHit = (*theHC)[j];
-    //Local3DPoint theEntrance(aHit->getEntry().x(),aHit->getEntry().y(),aHit->getEntry().z());
-    //Local3DPoint theExitPoint(aHit->getExit().x(),aHit->getExit().y(),aHit->getExit().z());
     
     Local3DPoint Entrata(aHit->getLocalEntry().x(),
        aHit->getLocalEntry().y(),
@@ -338,16 +289,13 @@ void Totem_RP_SD::Summarize()
 {
 }
 
-
 void Totem_RP_SD::clear()
 {
 } 
 
-
 void Totem_RP_SD::DrawAll()
 {
 } 
-
 
 void Totem_RP_SD::PrintAll()
 {
@@ -355,10 +303,9 @@ void Totem_RP_SD::PrintAll()
   theHC->PrintAllHits();
 }
 
-void Totem_RP_SD::fillHits(edm::PSimHitContainer& c, std::string n) {
-  if (slave->name() == n) c=slave->hits();
+void Totem_RP_SD::fillHits(edm::PSimHitContainer& c, const std::string & n) {
+  if (slave->name() == n) {c=slave->hits();}
 }
-
 
 void Totem_RP_SD::SetNumberingScheme(TotemRPVDetectorOrganization* scheme)
 {
@@ -368,7 +315,6 @@ void Totem_RP_SD::SetNumberingScheme(TotemRPVDetectorOrganization* scheme)
 }
 
 void Totem_RP_SD::update(const BeginOfEvent * i){
-  //  LogDebug("TotemRP") <<" Dispatched BeginOfEvent !"<<std::endl;
   clearHits();
   eventno = (*i)()->GetEventID();
 }
@@ -376,7 +322,6 @@ void Totem_RP_SD::update(const BeginOfEvent * i){
 void Totem_RP_SD::update (const ::EndOfEvent*)
 {
 }
-
 
 void Totem_RP_SD::clearHits(){
   slave->Initialize();

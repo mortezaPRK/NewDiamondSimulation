@@ -24,9 +24,6 @@ CTPPSDiamondOrganization :: ~CTPPSDiamondOrganization()
 }
 
 
-
-
-
 uint32_t CTPPSDiamondOrganization::GetUnitID(const G4Step* aStep) const
 {
   return const_cast<CTPPSDiamondOrganization *>(this)->GetUnitID(aStep);
@@ -39,30 +36,37 @@ uint32_t CTPPSDiamondOrganization::GetUnitID(const G4Step* aStep)
   G4VPhysicalVolume* physVol;             
   const G4VTouchable* touch = aStep->GetPreStepPoint()->GetTouchable();
 
+  std::cout  << " GetHistoryDepth = " << touch->GetHistoryDepth() << std::endl;
   for(int ii = 0; ii < touch->GetHistoryDepth(); ii++ )
   {
     physVol = touch->GetVolume(ii);
-                  
+/*    std::cout<< "----------------------------------------------------------------------------------------"<< std::endl;
+    std::cout<< "\t\t\tphysVol=" << physVol->GetName()
+                           << ", level=" << ii  << ", physVol->GetCopyNo()="
+                           << physVol->GetCopyNo()
+			   << std::endl;		                  
+*/
     if(physVol->GetName() == "CTPPS_Diamond_Segment")
     {
       theDetector = physVol->GetCopyNo()%100;
       thePlane=physVol->GetCopyNo()/100;
-      //std::cout<<"Detector name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo()<<std::endl; 
-      //std::cout<<"detector= "<<theDetector<<" plane= "<<thePlane<<std::endl;
-        
-    }                                          
+    std::cout<< "\n---------------------CTPPS_Diamond_Segment-------------------------------------------------------------------"<< std::endl;
+      std::cout<<"\t\t\t\t\tDetector name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo()<< std::endl; std::cout<<"\t\t\t\t\tdetector= "<<theDetector<<" plane= "<<thePlane<< " ii = " << ii << std::endl;
+    }
 
-    else if(physVol->GetName() == "Primary_Vacuum" )                                                                                                  
+    else if(physVol->GetName() == "Primary_Vacuum" )   
     {                        
-      //std::cout<<"Station name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo()<<std::endl;
+  //  std::cout<< "--------------------Primary_Vacuum------------------------------------------------------"<< std::endl;
       int cpy_no = physVol->GetCopyNo();
       theArm = (cpy_no/100)%10;
       theStation = (cpy_no/10)%10;
       theRoman_pot =cpy_no%10 ;
-      //std::cout<<"Arm: Station : RP: "<<theArm<<" "<<theStation<<" "<<theRoman_pot<<std::endl;
+    //  std::cout<<"Station name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo();
+    //  std::cout<<"\t\t\t\t\t\t\t\t\t\tArm: Station : RP: "<<theArm<<" "<<theStation<<" "<<theRoman_pot<<std::endl;
     }
-
-  }
-  
+    //std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ " << ii << std::endl;
+   std::cout<<"Diamond" << "physVol =" << physVol->GetName()<< ", level=" << ii
+          << ", physVol->GetCopyNo()=" << physVol->GetCopyNo()<< std::endl;
+  } 
   return CTPPSDiamondDetId(theArm, theStation, theRoman_pot, thePlane, theDetector).rawId(); 
 }

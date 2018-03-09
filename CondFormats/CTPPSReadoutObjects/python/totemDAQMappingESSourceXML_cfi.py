@@ -10,7 +10,6 @@ totemDAQMappingESSourceXML = cms.ESSource("TotemDAQMappingESSourceXML",
     # example configuration block:
     cms.PSet(
       validityRange = cms.EventRange("1:min - 999999999:max"),
-      #mappingFileNames = cms.vstring("CondFormats/CTPPSReadoutObjects/xml/ctpps_mapping_to_fill_5288.xml"),
       mappingFileNames = cms.vstring("CondFormats/CTPPSReadoutObjects/xml/mapping_tracking_strip_2017.xml"),
       maskFileNames = cms.vstring()
     )

@@ -38,6 +38,7 @@
 #include <string>
 
 class TrackingSlaveSD;
+class SimTrackManager;
 
 class CTPPSSD : public SensitiveTkDetector,
 		public Observer<const BeginOfEvent*>,
@@ -52,29 +53,29 @@ public:
    * edm::ParameterSet const&,
    * SimTrackManager const*
    */
-  CTPPSSD(std::string name,
-        DDCompactView const &cpv,
-        const SensitiveDetectorCatalog &clg,
-        edm::ParameterSet const &p,
-        SimTrackManager const *manager);
-  virtual ~CTPPSSD();
+  CTPPSSD(const std::string &,
+        const DDCompactView &,
+        const SensitiveDetectorCatalog &,
+        edm::ParameterSet const &,
+        SimTrackManager const *);
+  ~CTPPSSD() override;
   
-  virtual bool   ProcessHits(G4Step *,G4TouchableHistory *);
-  virtual uint32_t setDetUnitId(G4Step*);
+  bool   ProcessHits(G4Step *,G4TouchableHistory *) override;
+  uint32_t setDetUnitId(const G4Step *);
 
-  virtual void   Initialize(G4HCofThisEvent * HCE);
-  virtual void   EndOfEvent(G4HCofThisEvent * eventHC);
-  virtual void   clear();
-  virtual void   DrawAll();
-  virtual void   PrintAll();
+  void   Initialize(G4HCofThisEvent * HCE) override;
+  void   EndOfEvent(G4HCofThisEvent * eventHC) override;
+  void   clear() override;
+  void   DrawAll() override;
+  void   PrintAll() override;
 
-  void fillHits(edm::PSimHitContainer&, std::string use);
+  void fillHits(edm::PSimHitContainer&, const std::string &) override;
 
 private:
 
-  void           update(const BeginOfEvent *);
-  void           update(const ::EndOfEvent *);
-  virtual void   clearHits();
+  void           update(const BeginOfEvent *) override;
+  void           update(const ::EndOfEvent *) override;
+  void   clearHits() override;
 
 private:
 

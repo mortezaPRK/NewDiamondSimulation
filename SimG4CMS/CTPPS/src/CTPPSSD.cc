@@ -50,12 +50,12 @@
  * edm::ParameterSet const&,
  * SimTrackManager const*
  */
-CTPPSSD::CTPPSSD(std::string name,
-             DDCompactView const &cpv,
+CTPPSSD::CTPPSSD(const std::string & name,
+             const DDCompactView &cpv,
              const SensitiveDetectorCatalog &clg,
              edm::ParameterSet const &p,
              SimTrackManager const *manager) :
-  SensitiveTkDetector(name, cpv, clg, p), numberingScheme(0), name(name),
+  SensitiveTkDetector(name, cpv, clg, p), numberingScheme(0),
   hcID(-1), theHC(0), theManager(manager), currentHit(0), theTrack(0), 
   currentPV(0), unitID(0),  previousUnitID(0), preStepPoint(0), 
   postStepPoint(0), eventno(0){
@@ -78,7 +78,7 @@ CTPPSSD::CTPPSSD(std::string name,
     << "*******************************************************" << std::endl;
 
   slave  = new TrackingSlaveSD(name);
-
+/*
   //
   // Now attach the right detectors (LogicalVolumes) to me
   //
@@ -89,6 +89,7 @@ CTPPSSD::CTPPSSD(std::string name,
     this->AssignSD(*it);
     edm::LogInfo("CTPPSSim") << "CTPPSSD : Assigns SD to LV " << (*it);
   }
+*/
   if      (name == "CTPPSPixelHits") {
     numberingScheme = dynamic_cast<CTPPSVDetectorOrganization*>(new CTPPSPixelNumberingScheme());
 
@@ -104,8 +105,10 @@ CTPPSSD::CTPPSSD(std::string name,
 } 
 
 CTPPSSD::~CTPPSSD() { 
-  if (slave)           delete slave; 
-  if (numberingScheme) delete numberingScheme;
+  //if (slave)           delete slave; 
+  //if (numberingScheme) delete numberingScheme;
+  delete slave; 
+  delete numberingScheme;
 }
 
 bool CTPPSSD::ProcessHits(G4Step * aStep, G4TouchableHistory * ) {
@@ -125,7 +128,7 @@ bool CTPPSSD::ProcessHits(G4Step * aStep, G4TouchableHistory * ) {
   return true;
 }
 
-uint32_t CTPPSSD::setDetUnitId(G4Step * aStep) { 
+uint32_t CTPPSSD::setDetUnitId( const G4Step * aStep) { 
 
   return (numberingScheme == 0 ? 0 : numberingScheme->GetUnitID(aStep));
 }
@@ -134,7 +137,7 @@ void CTPPSSD::Initialize(G4HCofThisEvent * HCE) {
 
   LogDebug("CTPPSSim") << "CTPPSSD : Initialize called for " << name;
 
-  theHC = new CTPPSG4HitCollection(name, collectionName[0]);
+  theHC = new CTPPSG4HitCollection(GetName(), collectionName[0]);
   G4SDManager::GetSDMpointer()->AddNewCollection(name, collectionName[0]);
 
   if (hcID<0) 
@@ -186,8 +189,8 @@ void CTPPSSD::PrintAll() {
   theHC->PrintAllHits();
 } 
 
-void CTPPSSD::fillHits(edm::PSimHitContainer& c, std::string n) {
-  if (slave->name() == n) c=slave->hits();
+void CTPPSSD::fillHits(edm::PSimHitContainer& c, const std::string & n) {
+  if (slave->name() == n) {c=slave->hits();}
 }
 
 void CTPPSSD::update (const BeginOfEvent * i) {
@@ -372,7 +375,7 @@ void CTPPSSD::CreateNewHitEvo() {
   currentHit->setThetaAtEntry(ThetaAtEntry);
   currentHit->setPhiAtEntry(PhiAtEntry);
 
- currentHit->setEntryPoint(theEntryPoint);
+  currentHit->setEntryPoint(theEntryPoint);
   currentHit->setExitPoint(theExitPoint);
 
   currentHit->setParentId(ParentId);

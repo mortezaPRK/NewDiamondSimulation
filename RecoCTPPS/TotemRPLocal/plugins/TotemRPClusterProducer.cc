@@ -104,8 +104,7 @@ TotemRPClusterProducer::fillDescriptions( edm::ConfigurationDescriptions& descr 
 {
   edm::ParameterSetDescription desc;
 
-  desc.add<edm::InputTag>( "tagDigi", edm::InputTag( "RPSiDetDigitizer" ) )
-  //desc.add<edm::InputTag>( "tagDigi", edm::InputTag( "totemRPRawToDigi", "TrackingStrip" ) )
+  desc.add<edm::InputTag>( "tagDigi", edm::InputTag( "totemRPRawToDigi", "TrackingStrip" ) )
     ->setComment( "input digis collection to retrieve" );
   desc.add<int>( "verbosity", 0 );
 

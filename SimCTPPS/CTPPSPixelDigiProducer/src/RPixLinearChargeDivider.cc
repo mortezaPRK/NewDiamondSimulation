@@ -1,5 +1,5 @@
 #include "SimCTPPS/CTPPSPixelDigiProducer/interface/RPixLinearChargeDivider.h"
-#include "Geometry/VeryForwardGeometry/interface/RPixHepPDTWrapper.h"
+//#include "Geometry/VeryForwardGeometry/interface/RPixHepPDTWrapper.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
 #include "Geometry/VeryForwardGeometry/interface/CTPPSPixelTopology.h"
@@ -84,10 +84,19 @@ void RPixLinearChargeDivider::FluctuateEloss(int pid, double particleMomentum,
 					     std::vector<RPixEnergyDepositUnit>  &elossVector)
 {
 
-  double particleMass = RPixHepPDTWrapper::GetMass(pid)*1000; //to have the mass in MeV
-  if(particleMass==-1)
-    particleMass = 139.57; // Mass in MeV, Assume pion
+//  double particleMass = RPixHepPDTWrapper::GetMass(pid)*1000; //to have the mass in MeV
+//  if(particleMass==-1)
+//    particleMass = 139.57; // Mass in MeV, Assume pion
 
+  double particleMass = 139.6; // Mass in MeV, Assume pion
+  pid = std::abs(pid);
+  if (pid != 211) {       // Mass in MeV
+    if (pid == 11)        particleMass = 0.511;
+    else if (pid == 13)   particleMass = 105.7;
+    else if (pid == 321)  particleMass = 493.7;
+    else if (pid == 2212) particleMass = 938.3;
+  }
+  
   double segmentLength = length/NumberOfSegs;
 
 // Generate charge fluctuations.

@@ -1,5 +1,5 @@
 #include "SimCTPPS/RPDigiProducer/interface/RPLinearChargeDivider.h"
-#include "Geometry/VeryForwardRPTopology/interface/RPHepPDTWrapper.h"
+//#include "Geometry/VeryForwardRPTopology/interface/RPHepPDTWrapper.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
 #include "Geometry/VeryForwardRPTopology/interface/RPTopology.h"
@@ -105,9 +105,17 @@ void RPLinearChargeDivider::FluctuateEloss(int pid, double particleMomentum,
 //  if( length > 0.) dedx = eloss/length;
 //  else dedx = eloss;
 
-  double particleMass = RPHepPDTWrapper::GetMass(pid)*1000; //to have the mass in MeV
-  if(particleMass==-1)
-    particleMass = 139.57; // Mass in MeV, Assume pion
+//  double particleMass = RPHepPDTWrapper::GetMass(pid)*1000; //to have the mass in MeV
+//  if(particleMass==-1)
+//    particleMass = 139.57; // Mass in MeV, Assume pion
+  double particleMass = 139.6; // Mass in MeV, Assume pion
+  pid = std::abs(pid);
+  if (pid != 211) {       // Mass in MeV
+    if (pid == 11)        particleMass = 0.511;
+    else if (pid == 13)   particleMass = 105.7;
+    else if (pid == 321)  particleMass = 493.7;
+    else if (pid == 2212) particleMass = 938.3;
+  }
 
   double segmentLength = length/NumberOfSegs;
 
