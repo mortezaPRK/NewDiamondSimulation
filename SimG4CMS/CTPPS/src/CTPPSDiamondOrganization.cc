@@ -1,9 +1,9 @@
 // ////////////////////////////////////
-// Author Seyed Mohsen Etesami
+// Author
+// Seyed Mohsen Etesami  setesami@cern.ch
 // //////////////////////////////////////////
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-
 #include "SimG4CMS/CTPPS/interface/CTPPSDiamondOrganization.h"
 #include "DataFormats/CTPPSDetId/interface/CTPPSDiamondDetId.h"
 #include "G4VPhysicalVolume.hh"
@@ -40,33 +40,25 @@ uint32_t CTPPSDiamondOrganization::GetUnitID(const G4Step* aStep)
   for(int ii = 0; ii < touch->GetHistoryDepth(); ii++ )
   {
     physVol = touch->GetVolume(ii);
-/*    std::cout<< "----------------------------------------------------------------------------------------"<< std::endl;
-    std::cout<< "\t\t\tphysVol=" << physVol->GetName()
-                           << ", level=" << ii  << ", physVol->GetCopyNo()="
-                           << physVol->GetCopyNo()
-			   << std::endl;		                  
-*/
+
     if(physVol->GetName() == "CTPPS_Diamond_Segment")
     {
       theDetector = physVol->GetCopyNo()%100;
       thePlane=physVol->GetCopyNo()/100;
-    std::cout<< "\n---------------------CTPPS_Diamond_Segment-------------------------------------------------------------------"<< std::endl;
-      std::cout<<"\t\t\t\t\tDetector name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo()<< std::endl; std::cout<<"\t\t\t\t\tdetector= "<<theDetector<<" plane= "<<thePlane<< " ii = " << ii << std::endl;
+      LogDebug("CTPPSSimDiamond")<< "\n---------------------CTPPS_Diamond_Segment-------------------------------------------------------------------";
+      LogDebug("CTPPSSimDiamond")<<"\t\t\t\t\tDetector name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo();
+      LogDebug("CTPPSSimDiamond")<<"\t\t\t\t\tdetector= "<<theDetector<<" plane= "<<thePlane<< " ii = " << ii ;
     }
 
     else if(physVol->GetName() == "Primary_Vacuum" )   
     {                        
-  //  std::cout<< "--------------------Primary_Vacuum------------------------------------------------------"<< std::endl;
       int cpy_no = physVol->GetCopyNo();
       theArm = (cpy_no/100)%10;
       theStation = (cpy_no/10)%10;
       theRoman_pot =cpy_no%10 ;
-    //  std::cout<<"Station name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo();
-    //  std::cout<<"\t\t\t\t\t\t\t\t\t\tArm: Station : RP: "<<theArm<<" "<<theStation<<" "<<theRoman_pot<<std::endl;
     }
-    //std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ " << ii << std::endl;
-   std::cout<<"Diamond" << "physVol =" << physVol->GetName()<< ", level=" << ii
-          << ", physVol->GetCopyNo()=" << physVol->GetCopyNo()<< std::endl;
+    LogDebug("CTPPSSimDiamond")<<"Diamond" << "physVol =" << physVol->GetName()<< ", level=" << ii
+			      << ", physVol->GetCopyNo()=" << physVol->GetCopyNo();
   } 
   return CTPPSDiamondDetId(theArm, theStation, theRoman_pot, thePlane, theDetector).rawId(); 
 }

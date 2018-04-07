@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Author Seyed Mohsen Etesami setesami@cern.ch
+// Author
+//Seyed Mohsen Etesami setesami@cern.ch
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "SimG4CMS/CTPPS/interface/CTPPS_Diamond_G4Hit.h"
@@ -99,7 +100,7 @@ const CTPPS_Diamond_G4Hit& CTPPS_Diamond_G4Hit::operator=(const CTPPS_Diamond_G4
 
 void CTPPS_Diamond_G4Hit::Print() 
 {
-  edm::LogInfo("Diamond") << (*this);
+  edm::LogInfo("CTPPSSimDiamond") << (*this);
 }
 
 

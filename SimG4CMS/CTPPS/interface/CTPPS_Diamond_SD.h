@@ -1,8 +1,8 @@
-/** 
-Author 
-Seyed Mohsen Etesami setesami@cern.ch
-November 2016 
- */
+///////////////////////////////////////////////////////////////////////////////
+//Author: Seyed Mohsen Etesami
+// setesami@cern.ch
+// 2016 Nov
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CTPPS_CTPPSDiamondSD_h
 #define CTPPS_CTPPSDiamondSD_h
@@ -58,7 +58,6 @@ class CTPPS_Diamond_SD : public SensitiveTkDetector,
     uint32_t setDetUnitId(const G4Step * step);
     void update(const BeginOfEvent *) override;
     void update (const ::EndOfEvent*) override;
-    void initRun();
     void SetNumberingScheme(CTPPSVDetectorOrganization* scheme);
 
     TrackingSlaveSD* slave;

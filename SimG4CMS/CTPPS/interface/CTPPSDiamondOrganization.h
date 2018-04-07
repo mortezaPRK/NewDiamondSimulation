@@ -1,9 +1,10 @@
 // ///////////////////////
-// Author Seyed Mohsen Etesami
+// Author 
+// Seyed Mohsen Etesami setesami@cern.ch
 // //////////////////////////////
 
-#ifndef Forward_CTPPSDiamondOrganization_h
-#define Forward_CTPPSDiamondOrganization_h 
+#ifndef CTPPS_CTPPSDiamondOrganization_h
+#define CTPPS_CTPPSDiamondOrganization_h 
 
 
 #include "globals.hh"
@@ -30,4 +31,4 @@ class CTPPSDiamondOrganization : public CTPPSVDetectorOrganization
 
 
 
-#endif //Forward_CTPPSDiamondOrganization_h
+#endif //CTPPS_CTPPSDiamondOrganization_h
