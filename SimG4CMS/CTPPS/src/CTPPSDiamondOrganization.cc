@@ -36,15 +36,14 @@ uint32_t CTPPSDiamondOrganization::GetUnitID(const G4Step* aStep)
   G4VPhysicalVolume* physVol;             
   const G4VTouchable* touch = aStep->GetPreStepPoint()->GetTouchable();
 
-  std::cout  << " GetHistoryDepth = " << touch->GetHistoryDepth() << std::endl;
   for(int ii = 0; ii < touch->GetHistoryDepth(); ii++ )
   {
     physVol = touch->GetVolume(ii);
 
-    if(physVol->GetName() == "CTPPS_Diamond_Segment")
+    if(physVol->GetName() == "CTPPS_Diamond_Segment" || physVol->GetName() == "CTPPS_UFSD_Segment")
     {
       theDetector = physVol->GetCopyNo()%100;
-      thePlane=physVol->GetCopyNo()/100;
+      thePlane= physVol->GetCopyNo()/100 ;
       LogDebug("CTPPSSimDiamond")<< "\n---------------------CTPPS_Diamond_Segment-------------------------------------------------------------------";
       LogDebug("CTPPSSimDiamond")<<"\t\t\t\t\tDetector name "<<physVol->GetName()<<" copynumber= "<<physVol->GetCopyNo();
       LogDebug("CTPPSSimDiamond")<<"\t\t\t\t\tdetector= "<<theDetector<<" plane= "<<thePlane<< " ii = " << ii ;
@@ -58,7 +57,7 @@ uint32_t CTPPSDiamondOrganization::GetUnitID(const G4Step* aStep)
       theRoman_pot =cpy_no%10 ;
     }
     LogDebug("CTPPSSimDiamond")<<"Diamond" << "physVol =" << physVol->GetName()<< ", level=" << ii
-			      << ", physVol->GetCopyNo()=" << physVol->GetCopyNo();
+			      << ", physVol->GetCopyNo()=" << physVol->GetCopyNo()<<std::endl;
   } 
   return CTPPSDiamondDetId(theArm, theStation, theRoman_pot, thePlane, theDetector).rawId(); 
 }

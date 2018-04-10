@@ -16,7 +16,8 @@ DEFINE_SENSITIVEDETECTOR(CTPPSSensitiveDetector);
 typedef CTPPS_Diamond_SD CTPPSDiamondSensitiveDetector;
 DEFINE_SENSITIVEDETECTOR(CTPPSDiamondSensitiveDetector);
 
-
+typedef CTPPS_Diamond_SD CTPPSUFSDSensitiveDetector;
+DEFINE_SENSITIVEDETECTOR(CTPPSUFSDSensitiveDetector);
 
 
 

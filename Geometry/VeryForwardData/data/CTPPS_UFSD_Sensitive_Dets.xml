@@ -5,9 +5,9 @@
     <SpecParSection label="CTPPS_UFSD_Sensitive_Dets.xml">
         <SpecPar name="ROUHitsCTPPSUSFD">
 
-            <PartSelector path="//CTPPS_UFSD_Pattern1:CTPPS_UFSD_Plane"/>
-            <PartSelector path="//CTPPS_UFSD_Pattern2_SegmentA:CTPPS_UFSD_Plane"/>
-            <PartSelector path="//CTPPS_UFSD_Pattern2_SegmentB:CTPPS_UFSD_Plane"/>
+            <PartSelector path="//CTPPS_UFSD_Pattern1:CTPPS_UFSD_Segment"/>
+            <PartSelector path="//CTPPS_UFSD_Pattern2_SegmentA:CTPPS_UFSD_Segment"/>
+            <PartSelector path="//CTPPS_UFSD_Pattern2_SegmentB:CTPPS_UFSD_Segment"/>
 
             <Parameter name="SensitiveDetector" value="CTPPSUFSDSensitiveDetector" eval="false"/>
             <Parameter name="ReadOutName" value="CTPPSTimingHits" eval="false"/>

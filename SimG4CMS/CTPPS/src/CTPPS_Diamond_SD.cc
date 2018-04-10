@@ -55,7 +55,7 @@ CTPPS_Diamond_SD::CTPPS_Diamond_SD(const std::string & name, const DDCompactView
   slave  = new TrackingSlaveSD(name);
 
   
-  if (name == "CTPPSDiamondHits")  
+  if (name == "CTPPSTimingHits")  
   {
 
     numberingScheme = dynamic_cast<CTPPSVDetectorOrganization*>(new CTPPSDiamondNumberingScheme());
@@ -90,25 +90,28 @@ void CTPPS_Diamond_SD::Initialize(G4HCofThisEvent * HCE) {
 
 void CTPPS_Diamond_SD::Print_Hit_Info()
 {
-  LogDebug("CTPPSSimDiamond")
+  //LogDebug("CTPPSSimDiamond")
+  std::cout
   << theTrack->GetDefinition()->GetParticleName()
   << " PPS_Timing_SD CreateNewHit for"
   << " PV "     << currentPV->GetName()
   << " PVid = " << currentPV->GetCopyNo()
-  << " Unit "   << unitID;
-  LogDebug("CTPPSSimDiamond") 
+  << " Unit "   << unitID<<std::endl;
+  //LogDebug("CTPPSSimDiamond")
+  std::cout 
   << " primary "    << primaryID
   << " time slice " << tSliceID 
   << " of energy " << theTrack->GetTotalEnergy()
   << " Eloss " << Eloss
-  << " positions ";
+  << " positions "<<std::endl;
   printf(" PreStepPoint(%10f,%10f,%10f)",preStepPoint->GetPosition().x(),preStepPoint->GetPosition().y(),preStepPoint->GetPosition().z());
   printf(" PosStepPoint(%10f,%10f,%10f)\n",postStepPoint->GetPosition().x(),postStepPoint->GetPosition().y(),postStepPoint->GetPosition().z());
-  LogDebug("CTPPSSimDiamond") 
+//  LogDebug("CTPPSSimDiamond") 
+   std::cout
   << " positions " << "(" <<postStepPoint->GetPosition().x()<<","<<postStepPoint->GetPosition().y()<<","<<postStepPoint->GetPosition().z()<<")"
   << " For Track  " << theTrack->GetTrackID()
   << " which is a " << theTrack->GetDefinition()->GetParticleName()
-  << " ParentID is " << theTrack->GetParentID();
+  << " ParentID is " << theTrack->GetParentID()<<std::endl;
      
   if(theTrack->GetTrackID()==1)
   {
@@ -153,7 +156,7 @@ bool CTPPS_Diamond_SD::ProcessHits(G4Step * aStep, G4TouchableHistory * )
  
     if(theTrack->GetDefinition()->GetPDGEncoding()==2212)  
     {
-      Print_Hit_Info();
+      //Print_Hit_Info();
       ImportInfotoHit();    //in addtion to import info to hit it STORE hit as well
       LogDebug("CTPPSSimDiamond")  << " information imported to the hit " ;
     }
