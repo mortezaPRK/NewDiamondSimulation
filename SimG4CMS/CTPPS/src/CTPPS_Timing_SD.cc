@@ -191,64 +191,25 @@ G4bool CTPPS_Timing_SD::ProcessHits(G4Step * aStep, G4TouchableHistory * )
   }
   else
   {
- 
-
-
    GetStepInfo(aStep);
- 
-
-
-
-
-if(aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName()=="PhotoDetector_Window")
- { ImportInfotoHit();    // added pps //in addtion to import info to hit it STORE hit as well
-   //Print_Hit_Info();
-   theTrack->SetTrackStatus(fStopAndKill);
- } 
-
-   
-    TrackSwitchF=-1;
-    TrackSwitchS=-1;
-
-
- const G4VTouchable* thetouch = aStep->GetPreStepPoint()->GetTouchable();
-
-if(aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName()=="QLbar"&&theTrack->GetDefinition()!=G4OpticalPhoton::OpticalPhotonDefinition()&&thetouch->GetVolume(1)->GetName()=="CTPPS_Timing_Box_First")
- {
-  for(unsigned int i=0;i<theTrackSwitchVecF.size();i++)
+    if (theTrack->GetDefinition()->GetPDGEncoding() == 2212)
     {
-      if(theTrackSwitchVecF[i]==theTrack->GetTrackID())
-        TrackSwitchF=1;
-    }
-    
-    if(TrackSwitchF!=1)
-    {    
-      theTrackSwitchVecF.push_back(theTrack->GetTrackID());
-      ImportInfotoHit();
-      if(theTrack->GetDefinition()->GetParticleName()=="proton")
-        Print_Hit_Info();
-
+      ImportInfotoHit(); //in addtion to import info to hit it STORE hit as well
+      LogDebug("PPSSimDiamond") << " information imported to the hit ";
     } 
-    
- }
+        std::cout << "CTPPS_TIMING : There is a hit to process: "
+              << std::endl
+              << "1- aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName(): "
+              << aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName()
+              << std::endl
+              << "2- theTrack->GetDefinition(): "
+              << theTrack->GetDefinition()
+              << std::endl
+              << "5- theTrack->GetDefinition()->GetPDGEncoding(): "
+              << theTrack->GetDefinition()->GetPDGEncoding()
+              << std::endl
+              << std::endl;
 
-if(aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName()=="QLbar"&&theTrack->GetDefinition()!= G4OpticalPhoton::OpticalPhotonDefinition()&&thetouch->GetVolume(1)->GetName()=="CTPPS_Timing_Box_Second")
- {
-  for(unsigned int i=0;i<theTrackSwitchVecS.size();i++)
-    {
-      if(theTrackSwitchVecS[i]==theTrack->GetTrackID())
-        TrackSwitchS=1;
-    }
-
-    if(TrackSwitchS!=1)
-    {
-      theTrackSwitchVecS.push_back(theTrack->GetTrackID());
-      ImportInfotoHit();
-      if(theTrack->GetDefinition()->GetParticleName()=="proton")
-        Print_Hit_Info();  
-    }
-
- }
 
 
       //LogDebug("PP_Timing_SD")<<"New hit created"<<std::endl;
