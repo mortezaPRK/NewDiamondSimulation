@@ -40,7 +40,7 @@
 
   <PosPartSection label="CTPPS_Diamond_Detector_Assembly.xml">
     <PosPart copyNumber="1">
-      <rParent name="CTPPS_Timing_Horizontal_Pot:Bottom_Wall"/>
+      <rParent name="CTPPS_Timing_Horizontal_Pot:Primary_Vacuum"/>
       <rChild name="CTPPS_Diamond_Main_Box"/>
       <rRotation name="CTPPS_Diamond_Transformations:planes_box_rotation"/>
       <Translation x="0*cm" y="0*cm" z="-[CTPPS_Timing_Horizontal_Pot:bottom_wall_thickness]/2+[CTPPS_Timing_Horizontal_Pot:plane_length]/2+[CTPPS_Diamond_Parameters:PCB_extend_dx]"/>
