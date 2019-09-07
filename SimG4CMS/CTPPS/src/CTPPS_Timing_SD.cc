@@ -192,7 +192,7 @@ G4bool CTPPS_Timing_SD::ProcessHits(G4Step * aStep, G4TouchableHistory * )
   else
   {
    GetStepInfo(aStep);
-    if (theTrack->GetDefinition()->GetPDGEncoding() == 2212)
+    if (theTrack->GetDefinition()->GetPDGEncoding() == 2112)
     {
       ImportInfotoHit(); //in addtion to import info to hit it STORE hit as well
       LogDebug("PPSSimDiamond") << " information imported to the hit ";
