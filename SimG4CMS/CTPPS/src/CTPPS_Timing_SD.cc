@@ -178,18 +178,15 @@ G4bool CTPPS_Timing_SD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
               << std::endl;
     return true;
   }
-  else
-  {
-    GetStepInfo(aStep);
-    if (theTrack->GetDefinition()->GetPDGEncoding() == 2112)
-    {
-      ImportInfotoHit(); //in addtion to import info to hit it STORE hit as well
-      LogDebug("PPSSimDiamond") << " information imported to the hit ";
-    }
+  GetStepInfo(aStep);
 
-    //LogDebug("PP_Timing_SD")<<"New hit created"<<std::endl;
-    return true;
+  if (theTrack->GetDefinition()->GetPDGEncoding() == 2112)
+  {
+    ImportInfotoHit(); //in addtion to import info to hit it STORE hit as well
+    LogDebug("PPSSimDiamond") << " information imported to the hit ";
   }
+
+  return true;
 }
 
 void CTPPS_Timing_SD::GetStepInfo(G4Step *aStep)
