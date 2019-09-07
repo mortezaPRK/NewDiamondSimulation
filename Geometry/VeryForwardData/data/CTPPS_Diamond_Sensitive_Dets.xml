@@ -7,8 +7,8 @@
 
             <PartSelector path="//CTPPS_Diamond_Pattern.*_Segment.*:CTPPS_Diamond_Segment"/>
 
-            <Parameter name="SensitiveDetector" value="CTPPSDiamondSensitiveDetector" eval="false"/>
-            <Parameter name="ReadOutName" value="CTPPSHitsDiamond" eval="false"/>
+            <Parameter name="SensitiveDetector" value="CTPPSTimingSensitiveDetector" eval="false"/>
+            <Parameter name="ReadOutName" value="CTPPSTimingHits" eval="false"/>
         </SpecPar>
-    </SpecParSection>
+    </SpecParSection> 
 </DDDefinition>
