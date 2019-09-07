@@ -3,7 +3,7 @@
 // Date: 26.05.2015
 //Author: Seyed Mohsen Etesami
 // Description: Sensitive Detector class for CTPPS Timing Detectors
-// Modifications: 
+// Modifications:
 ///////////////////////////////////////////////////////////////////////////////
 #include "SimG4CMS/CTPPS/interface/CTPPS_Timing_SD.h"
 #include "SimG4CMS/CTPPS/interface/CTPPSTimingNumberingScheme.h"
@@ -33,7 +33,6 @@
 #include "G4SystemOfUnits.hh"
 //
 
-
 #include "G4SDManager.hh"
 #include "G4Step.hh"
 #include "G4Track.hh"
@@ -49,120 +48,110 @@
 #include <string>
 #include <bitset>
 
-CTPPS_Timing_SD::CTPPS_Timing_SD(std::string name, const DDCompactView & cpv, const SensitiveDetectorCatalog & clg,
-     edm::ParameterSet const & p, const SimTrackManager* manager) : 
-  SensitiveTkDetector(name, cpv, clg, p), 
-  numberingScheme(0),  
-  name(name), hcID(-1), theHC(0), currentHit(0), theTrack(0), currentPV(0), 
-  unitID(0),  preStepPoint(0), postStepPoint(0), eventno(0)
+CTPPS_Timing_SD::CTPPS_Timing_SD(std::string name, const DDCompactView &cpv, const SensitiveDetectorCatalog &clg,
+                                 edm::ParameterSet const &p, const SimTrackManager *manager) : SensitiveTkDetector(name, cpv, clg, p),
+                                                                                               numberingScheme(0),
+                                                                                               name(name), hcID(-1), theHC(0), currentHit(0), theTrack(0), currentPV(0),
+                                                                                               unitID(0), preStepPoint(0), postStepPoint(0), eventno(0)
 {
 
-
-CTPPS_Timing_SD::initRun();
-
-
+  CTPPS_Timing_SD::initRun();
 
   collectionName.insert(name);
-std::cout<<"collectionName[0]: "<<collectionName[0]<<std::endl;
-  
+  std::cout << "collectionName[0]: " << collectionName[0] << std::endl;
+
   edm::ParameterSet m_Anal = p.getParameter<edm::ParameterSet>("CTPPS_Timing_SD");
   verbosity_ = m_Anal.getParameter<int>("Verbosity");
-  
-// LogDebug("TotemRP")
+
+  // LogDebug("TotemRP")
   std::cout
-    << "*******************************************************\n"
-    << "*                                                     *\n"
-    << "* Constructing a CTPPS_Timing_SD  with name " << name << "\n"
-    << "*                                                     *\n"
-    << "*******************************************************" << std::endl;
+      << "*******************************************************\n"
+      << "*                                                     *\n"
+      << "* Constructing a CTPPS_Timing_SD  with name " << name << "\n"
+      << "*                                                     *\n"
+      << "*******************************************************" << std::endl;
 
+  slave = new TrackingSlaveSD(name);
 
-  slave  = new TrackingSlaveSD(name);
+  //CTPPS_Timing_MaterialProperties::DumpSurfaceInfo();
 
-
-//CTPPS_Timing_MaterialProperties::DumpSurfaceInfo();
- 
-
- //
+  //
   // Now attach the right detectors (LogicalVolumes) to me
   //
-  
+
   //std::vector<std::string> lvNames = SensitiveDetectorCatalog::instance()->logicalNames(name);
   std::vector<std::string> lvNames = clg.logicalNames(name);
   this->Register();
-  for (std::vector<std::string>::iterator it=lvNames.begin();  it !=lvNames.end(); it++)
+  for (std::vector<std::string>::iterator it = lvNames.begin(); it != lvNames.end(); it++)
   {
 
-  //   std::cout<<"name: "<<name<<std::endl;
-//    std::cout<<"lvNames: "<<*it<<std::endl;
+    //   std::cout<<"name: "<<name<<std::endl;
+    //    std::cout<<"lvNames: "<<*it<<std::endl;
     this->AssignSD(*it);
     edm::LogInfo("PP_Timing_SD") << "PP_Timing_SD : Assigns SD to LV " << (*it);
   }
 
-  
+  if (name == "CTPPSTimingHits")
+  {
 
-  if (name == "CTPPSTimingHits")  
-{
-
-    numberingScheme = dynamic_cast<CTPPSTimingVDetectorOrganization*>(new CTPPSTimingNumberingScheme(3));
+    numberingScheme = dynamic_cast<CTPPSTimingVDetectorOrganization *>(new CTPPSTimingNumberingScheme(3));
   }
-  else 
+  else
   {
     edm::LogWarning("PP_Timing_SD") << "PP_Timing_SD: ReadoutName not supported\n";
   }
-  
-  edm::LogInfo("PP_Timing_SD") << "PP_Timing_SD: Instantiation completed";
 
+  edm::LogInfo("PP_Timing_SD") << "PP_Timing_SD: Instantiation completed";
 }
 
-
 CTPPS_Timing_SD::~CTPPS_Timing_SD()
-{ 
+{
   if (slave)
-    delete slave; 
+    delete slave;
   if (numberingScheme)
     delete numberingScheme;
 }
 
-void CTPPS_Timing_SD::Initialize(G4HCofThisEvent * HCE) {
-    LogDebug("PP_Timing_SD") << "PP_Timing_SD : Initialize called for " << name;
+void CTPPS_Timing_SD::Initialize(G4HCofThisEvent *HCE)
+{
+  LogDebug("PP_Timing_SD") << "PP_Timing_SD : Initialize called for " << name;
 
-    //std::cout << "CTPPS_Timing_SD: Initialize called for:   " << name << std::endl;
-    theHC = new CTPPS_Timing_G4HitCollection(name, collectionName[0]);
-    G4SDManager::GetSDMpointer()->AddNewCollection(name, collectionName[0]);
+  //std::cout << "CTPPS_Timing_SD: Initialize called for:   " << name << std::endl;
+  theHC = new CTPPS_Timing_G4HitCollection(name, collectionName[0]);
+  G4SDManager::GetSDMpointer()->AddNewCollection(name, collectionName[0]);
 
-    if (hcID < 0)
-        hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
-    HCE->AddHitsCollection(hcID, theHC);
-    theTrackSwitchVecF.push_back(-1);
-    theTrackSwitchVecS.push_back(-1);
-
+  if (hcID < 0)
+    hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+  HCE->AddHitsCollection(hcID, theHC);
+  theTrackSwitchVecF.push_back(-1);
+  theTrackSwitchVecS.push_back(-1);
 }
-
 
 void CTPPS_Timing_SD::Print_Hit_Info()
 {
- LogDebug("PP_Timing_SD")<< theTrack->GetDefinition()->GetParticleName()
-       << " CTPPS_Timing_SD CreateNewHit for"
-       << " PV "     << currentPV->GetName()
-       << " PVid = " << currentPV->GetCopyNo()
-       //<< " MVid = " << currentPV->GetMother()->GetCopyNo()
-       << " Unit "   << unitID;
-  LogDebug("PP_Timing_SD") 
-<< " primary "    << primaryID
-       << " time slice " << tSliceID 
-       << " of energy " << theTrack->GetTotalEnergy()
-       << " Eloss " << Eloss
-       << " positions ";
-//      printf("(%10f,%10f,%10f)",preStepPoint->GetPosition().x(),preStepPoint->GetPosition().y(),preStepPoint->GetPosition().z());
-//      printf("(%10f,%10f,%10f)",postStepPoint->GetPosition().x(),postStepPoint->GetPosition().y(),postStepPoint->GetPosition().z());
-  LogDebug("PP_Timing_SD") 
-<< " positions " << "(" <<postStepPoint->GetPosition().x()<<","<<postStepPoint->GetPosition().y()<<","<<postStepPoint->GetPosition().z()<<")"
-       << " For Track  " << theTrack->GetTrackID()
-       << " which is a " << theTrack->GetDefinition()->GetParticleName()
-       << " ParentID is " << theTrack->GetParentID()<<std::endl<<std::endl;
-     
-  if(theTrack->GetTrackID()==1)
+  LogDebug("PP_Timing_SD") << theTrack->GetDefinition()->GetParticleName()
+                           << " CTPPS_Timing_SD CreateNewHit for"
+                           << " PV " << currentPV->GetName()
+                           << " PVid = " << currentPV->GetCopyNo()
+                           //<< " MVid = " << currentPV->GetMother()->GetCopyNo()
+                           << " Unit " << unitID;
+  LogDebug("PP_Timing_SD")
+      << " primary " << primaryID
+      << " time slice " << tSliceID
+      << " of energy " << theTrack->GetTotalEnergy()
+      << " Eloss " << Eloss
+      << " positions ";
+  //      printf("(%10f,%10f,%10f)",preStepPoint->GetPosition().x(),preStepPoint->GetPosition().y(),preStepPoint->GetPosition().z());
+  //      printf("(%10f,%10f,%10f)",postStepPoint->GetPosition().x(),postStepPoint->GetPosition().y(),postStepPoint->GetPosition().z());
+  LogDebug("PP_Timing_SD")
+      << " positions "
+      << "(" << postStepPoint->GetPosition().x() << "," << postStepPoint->GetPosition().y() << "," << postStepPoint->GetPosition().z() << ")"
+      << " For Track  " << theTrack->GetTrackID()
+      << " which is a " << theTrack->GetDefinition()->GetParticleName()
+      << " ParentID is " << theTrack->GetParentID() << std::endl
+      << std::endl;
+
+  if (theTrack->GetTrackID() == 1)
   {
     LogDebug("PP_Timing_SD") << " primary particle ";
   }
@@ -171,91 +160,75 @@ void CTPPS_Timing_SD::Print_Hit_Info()
     LogDebug("PP_Timing_SD") << " daughter of part. " << theTrack->GetParentID();
   }
 
-  LogDebug("PP_Timing_SD")  << " and created by " ;
-  
-  if(theTrack->GetCreatorProcess()!=NULL)
-    LogDebug("PP_Timing_SD") << theTrack->GetCreatorProcess()->GetProcessName() ;
-  else 
+  LogDebug("PP_Timing_SD") << " and created by ";
+
+  if (theTrack->GetCreatorProcess() != NULL)
+    LogDebug("PP_Timing_SD") << theTrack->GetCreatorProcess()->GetProcessName();
+  else
     LogDebug("PP_Timing_SD") << "NO process";
-    
+
   LogDebug("PP_Timing_SD") << std::endl;
 }
 
-
-G4bool CTPPS_Timing_SD::ProcessHits(G4Step * aStep, G4TouchableHistory * )
+G4bool CTPPS_Timing_SD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
   if (aStep == NULL)
-  {	    
-      std::cout<<"CTPPS_TIMING : There is no hit to process"<<std::endl<<std::endl;
-      return true;
+  {
+    std::cout << "CTPPS_TIMING : There is no hit to process" << std::endl
+              << std::endl;
+    return true;
   }
   else
   {
-   GetStepInfo(aStep);
+    GetStepInfo(aStep);
     if (theTrack->GetDefinition()->GetPDGEncoding() == 2112)
     {
       ImportInfotoHit(); //in addtion to import info to hit it STORE hit as well
       LogDebug("PPSSimDiamond") << " information imported to the hit ";
-    } 
-        std::cout << "CTPPS_TIMING : There is a hit to process: "
-              << std::endl
-              << "1- aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName(): "
-              << aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName()
-              << std::endl
-              << "2- theTrack->GetDefinition(): "
-              << theTrack->GetDefinition()
-              << std::endl
-              << "5- theTrack->GetDefinition()->GetPDGEncoding(): "
-              << theTrack->GetDefinition()->GetPDGEncoding()
-              << std::endl
-              << std::endl;
+    }
 
-
-
-      //LogDebug("PP_Timing_SD")<<"New hit created"<<std::endl;
-	    return true;
-	}
+    //LogDebug("PP_Timing_SD")<<"New hit created"<<std::endl;
+    return true;
+  }
 }
 
-
-void CTPPS_Timing_SD::GetStepInfo(G4Step* aStep)
+void CTPPS_Timing_SD::GetStepInfo(G4Step *aStep)
 {
- 
 
-  theTrack = aStep->GetTrack();   
+  theTrack = aStep->GetTrack();
 
-  preStepPoint = aStep->GetPreStepPoint(); 
-  postStepPoint = aStep->GetPostStepPoint(); 
+  preStepPoint = aStep->GetPreStepPoint();
+  postStepPoint = aStep->GetPostStepPoint();
   hitPoint = preStepPoint->GetPosition();
   exitPoint = postStepPoint->GetPosition();
   currentPV = preStepPoint->GetPhysicalVolume();
   theLocalEntryPoint = SetToLocal(hitPoint);
   theLocalExitPoint = SetToLocal(exitPoint);
 
-  tSlice = (postStepPoint->GetGlobalTime() )/nanosecond;
-  tSliceID = (int) tSlice;
+  tSlice = (postStepPoint->GetGlobalTime()) / nanosecond;
+  tSliceID = (int)tSlice;
   unitID = setDetUnitId(aStep);
 
-  if(verbosity_)
-    LogDebug("PP_Timing_SD") << "UNITa " << unitID <<std::endl;
+  if (verbosity_)
+    LogDebug("PP_Timing_SD") << "UNITa " << unitID << std::endl;
 
   primaryID = theTrack->GetTrackID();
 
-  Pabs = (aStep->GetPreStepPoint()->GetMomentum().mag())/GeV;
-  p_x = (aStep->GetPreStepPoint()->GetMomentum().x())/GeV;
-  p_y = (aStep->GetPreStepPoint()->GetMomentum().y())/GeV;
-  p_z = (aStep->GetPreStepPoint()->GetMomentum().z())/GeV;
-  
+  Pabs = (aStep->GetPreStepPoint()->GetMomentum().mag()) / GeV;
+  p_x = (aStep->GetPreStepPoint()->GetMomentum().x()) / GeV;
+  p_y = (aStep->GetPreStepPoint()->GetMomentum().y()) / GeV;
+  p_z = (aStep->GetPreStepPoint()->GetMomentum().z()) / GeV;
+
   //pps change post to pre
-  Tof = aStep->GetPreStepPoint()->GetGlobalTime()/nanosecond;  
-  
+  Tof = aStep->GetPreStepPoint()->GetGlobalTime() / nanosecond;
+
   //pps comment  Eloss = aStep->GetTotalEnergyDeposit()/GeV;
-  Eloss = (aStep->GetPreStepPoint()->GetTotalEnergy()/eV);  
-  
+  Eloss = (aStep->GetPreStepPoint()->GetTotalEnergy() / eV);
+
   ParticleType = theTrack->GetDefinition()->GetPDGEncoding();
 
   //corrected phi and theta treatment
-  G4ThreeVector gmd  = aStep->GetPreStepPoint()->GetMomentumDirection();
+  G4ThreeVector gmd = aStep->GetPreStepPoint()->GetMomentumDirection();
   // convert it to local frame
   G4ThreeVector lmd = ((G4TouchableHistory *)(aStep->GetPreStepPoint()->GetTouchable()))->GetHistory()->GetTopTransform().TransformAxis(gmd);
   Local3DPoint lnmd = ConvertToLocal3DPoint(lmd);
@@ -265,42 +238,39 @@ void CTPPS_Timing_SD::GetStepInfo(G4Step* aStep)
   //ThetaAtEntry     = aStep->GetPreStepPoint()->GetPosition().theta()/deg;
   //PhiAtEntry       = aStep->GetPreStepPoint()->GetPosition().phi()/deg;
 
-  //LogDebug("PP_Timing_SD") << "UUUUUUUNNNNNNNNNNIIIIIIIIIITTTTTTTTTTTTTIIIIDDDD " << 
+  //LogDebug("PP_Timing_SD") << "UUUUUUUNNNNNNNNNNIIIIIIIIIITTTTTTTTTTTTTIIIIDDDD " <<
   //numberingScheme->GetUnitID(aStep) << std::endl ;
- 
 
- if(IsPrimary(theTrack))
+  if (IsPrimary(theTrack))
     ParentId = 0;
-  else ParentId = theTrack->GetParentID();
-  
-  Vx = theTrack->GetVertexPosition().x()/mm;
-  Vy = theTrack->GetVertexPosition().y()/mm;
-  Vz = theTrack->GetVertexPosition().z()/mm;
+  else
+    ParentId = theTrack->GetParentID();
+
+  Vx = theTrack->GetVertexPosition().x() / mm;
+  Vy = theTrack->GetVertexPosition().y() / mm;
+  Vz = theTrack->GetVertexPosition().z() / mm;
 }
 
-
-uint32_t CTPPS_Timing_SD::setDetUnitId(G4Step * aStep)
-{ 
-//  LogDebug("PP_Timing_SD")<< "ALL'INTERNO DI SETDETUNITID PER IL DETECTOR "<< name << std::endl;
-//  LogDebug("PP_Timing_SD") << "PIANO " << numberingScheme->GetCurrentPlane()<<std::endl;
+uint32_t CTPPS_Timing_SD::setDetUnitId(G4Step *aStep)
+{
+  //  LogDebug("PP_Timing_SD")<< "ALL'INTERNO DI SETDETUNITID PER IL DETECTOR "<< name << std::endl;
+  //  LogDebug("PP_Timing_SD") << "PIANO " << numberingScheme->GetCurrentPlane()<<std::endl;
   return (numberingScheme == 0 ? 0 : numberingScheme->GetUnitID(aStep));
 }
 
-
-void CTPPS_Timing_SD::StoreHit(CTPPS_Timing_G4Hit* hit)
+void CTPPS_Timing_SD::StoreHit(CTPPS_Timing_G4Hit *hit)
 {
-  if (hit == 0 )
+  if (hit == 0)
   {
-    if(verbosity_)
-      LogDebug("PP_Timing_SD") << "PP_Timing_SD: hit to be stored is NULL !!" <<std::endl;
+    if (verbosity_)
+      LogDebug("PP_Timing_SD") << "PP_Timing_SD: hit to be stored is NULL !!" << std::endl;
     return;
   }
 
-  theHC->insert( hit );
+  theHC->insert(hit);
 }
 
-
-void CTPPS_Timing_SD::ImportInfotoHit()    // added pps
+void CTPPS_Timing_SD::ImportInfotoHit() // added pps
 {
   currentHit = new CTPPS_Timing_G4Hit;
   currentHit->setTrackID(primaryID);
@@ -311,7 +281,7 @@ void CTPPS_Timing_SD::ImportInfotoHit()    // added pps
 
   currentHit->setPabs(Pabs);
   currentHit->setTof(Tof);
-   currentHit->setEnergyLoss(Eloss);
+  currentHit->setEnergyLoss(Eloss);
   currentHit->setParticleType(ParticleType);
   currentHit->setThetaAtEntry(ThetaAtEntry);
   currentHit->setPhiAtEntry(PhiAtEntry);
@@ -319,84 +289,75 @@ void CTPPS_Timing_SD::ImportInfotoHit()    // added pps
   currentHit->setEntry(hitPoint);
   currentHit->setExit(exitPoint);
 
- currentHit->setLocalEntry(hitPoint);
- currentHit->setLocalExit(exitPoint);
+  currentHit->setLocalEntry(hitPoint);
+  currentHit->setLocalExit(exitPoint);
 
-//  currentHit->setLocalEntry(theLocalEntryPoint);
-// currentHit->setLocalExit(theLocalExitPoint);
+  //  currentHit->setLocalEntry(theLocalEntryPoint);
+  // currentHit->setLocalExit(theLocalExitPoint);
 
   currentHit->setParentId(ParentId);
   currentHit->setVx(Vx);
   currentHit->setVy(Vy);
   currentHit->setVz(Vz);
-  
+
   currentHit->set_p_x(p_x);
   currentHit->set_p_y(p_y);
   currentHit->set_p_z(p_z);
 
-
-
   StoreHit(currentHit);
-// LogDebug("PP_Timing_SD") << "STORED HIT IN: " << unitID << std::endl;
-}	 
-
+  // LogDebug("PP_Timing_SD") << "STORED HIT IN: " << unitID << std::endl;
+}
 
 G4ThreeVector CTPPS_Timing_SD::SetToLocal(G4ThreeVector global)
 {
   G4ThreeVector localPoint;
-  const G4VTouchable* touch= preStepPoint->GetTouchable();
+  const G4VTouchable *touch = preStepPoint->GetTouchable();
   localPoint = touch->GetHistory()->GetTopTransform().TransformPoint(global);
-  
+
   return localPoint;
 }
-     
 
-void CTPPS_Timing_SD::EndOfEvent(G4HCofThisEvent* )
+void CTPPS_Timing_SD::EndOfEvent(G4HCofThisEvent *)
 {
 
-    theTrackSwitchVecF.clear();
-    theTrackSwitchVecS.clear();
+  theTrackSwitchVecF.clear();
+  theTrackSwitchVecS.clear();
 
   // here we loop over transient hits and make them persistent
-  for (int j=0; j<theHC->entries() && j<15000; j++)
+  for (int j = 0; j < theHC->entries() && j < 15000; j++)
   {
-    CTPPS_Timing_G4Hit* aHit = (*theHC)[j];
+    CTPPS_Timing_G4Hit *aHit = (*theHC)[j];
     //Local3DPoint theEntrance(aHit->getEntry().x(),aHit->getEntry().y(),aHit->getEntry().z());
     //Local3DPoint theExitPoint(aHit->getExit().x(),aHit->getExit().y(),aHit->getExit().z());
-    
-    Local3DPoint Entrata(aHit->getLocalEntry().x(),
-       aHit->getLocalEntry().y(),
-       aHit->getLocalEntry().z());
-    Local3DPoint Uscita(aHit->getLocalExit().x(),
-       aHit->getLocalExit().y(),
-       aHit->getLocalExit().z());
-    slave->processHits(PSimHit(Entrata,Uscita,
-             aHit->getPabs(), aHit->getTof(),
-             aHit->getEnergyLoss(), aHit->getParticleType(),
-             aHit->getUnitID(), aHit->getTrackID(),
-             aHit->getThetaAtEntry(),aHit->getPhiAtEntry()));
-  
 
-  //   std::cout << "timing hit: " << aHit->getUnitID()<< "  " << std::bitset<32>(aHit->getUnitID()) << std::endl;
+    Local3DPoint Entrata(aHit->getLocalEntry().x(),
+                         aHit->getLocalEntry().y(),
+                         aHit->getLocalEntry().z());
+    Local3DPoint Uscita(aHit->getLocalExit().x(),
+                        aHit->getLocalExit().y(),
+                        aHit->getLocalExit().z());
+    slave->processHits(PSimHit(Entrata, Uscita,
+                               aHit->getPabs(), aHit->getTof(),
+                               aHit->getEnergyLoss(), aHit->getParticleType(),
+                               aHit->getUnitID(), aHit->getTrackID(),
+                               aHit->getThetaAtEntry(), aHit->getPhiAtEntry()));
+
+    //   std::cout << "timing hit: " << aHit->getUnitID()<< "  " << std::bitset<32>(aHit->getUnitID()) << std::endl;
   }
   Summarize();
 }
-     
 
 void CTPPS_Timing_SD::Summarize()
 {
 }
 
-
 void CTPPS_Timing_SD::clear()
 {
-} 
-
+}
 
 void CTPPS_Timing_SD::DrawAll()
 {
-} 
-
+}
 
 void CTPPS_Timing_SD::PrintAll()
 {
@@ -404,56 +365,51 @@ void CTPPS_Timing_SD::PrintAll()
   theHC->PrintAllHits();
 }
 
-void CTPPS_Timing_SD::fillHits(edm::PSimHitContainer& c, std::string n) {
-  if (slave->name() == n) c=slave->hits();
+void CTPPS_Timing_SD::fillHits(edm::PSimHitContainer &c, std::string n)
+{
+  if (slave->name() == n)
+    c = slave->hits();
 }
 
-
-void CTPPS_Timing_SD::SetNumberingScheme(CTPPSTimingVDetectorOrganization* scheme)
+void CTPPS_Timing_SD::SetNumberingScheme(CTPPSTimingVDetectorOrganization *scheme)
 {
   if (numberingScheme)
     delete numberingScheme;
   numberingScheme = scheme;
 }
 
-void CTPPS_Timing_SD::update(const BeginOfEvent * i){
+void CTPPS_Timing_SD::update(const BeginOfEvent *i)
+{
   //  LogDebug("PP_Timing_SD") <<" Dispatched BeginOfEvent !"<<std::endl;
   clearHits();
   eventno = (*i)()->GetEventID();
-//std::cout<<"#######################Begin of Event number: "<<eventno<<std::endl<<std::endl;
-
+  //std::cout<<"#######################Begin of Event number: "<<eventno<<std::endl<<std::endl;
 }
 
-void CTPPS_Timing_SD::update (const ::EndOfEvent*)
+void CTPPS_Timing_SD::update(const ::EndOfEvent *)
 {
 }
 
-
 //pps added
-void CTPPS_Timing_SD::clearTrack( G4Track * track){
-    track->SetTrackStatus(fStopAndKill);   
+void CTPPS_Timing_SD::clearTrack(G4Track *track)
+{
+  track->SetTrackStatus(fStopAndKill);
 }
 
-
-void CTPPS_Timing_SD::clearHits(){
+void CTPPS_Timing_SD::clearHits()
+{
   slave->Initialize();
 }
 
-bool CTPPS_Timing_SD::IsPrimary(const G4Track * track)
+bool CTPPS_Timing_SD::IsPrimary(const G4Track *track)
 {
-  TrackInformation* info 
-    = dynamic_cast<TrackInformation*>( track->GetUserInformation() );
+  TrackInformation *info = dynamic_cast<TrackInformation *>(track->GetUserInformation());
   return info && info->isPrimary();
 }
 
-
-
-void CTPPS_Timing_SD::initRun(){
-// construct your own material properties for setting refractionindex and so on
+void CTPPS_Timing_SD::initRun()
+{
+  // construct your own material properties for setting refractionindex and so on
   // theMaterialProperties = new CTPPS_Timing_MaterialProperties(theMPDebug_);
-   theMaterialProperties = new CTPPS_Timing_MaterialProperties(3);
-
+  theMaterialProperties = new CTPPS_Timing_MaterialProperties(3);
 }
-  
-
-
