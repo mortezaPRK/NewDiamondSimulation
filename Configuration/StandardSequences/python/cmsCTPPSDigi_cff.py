@@ -23,7 +23,7 @@ from SimCalorimetry.Configuration.SimCalorimetry_cff import *
 #
 from SimMuon.Configuration.SimMuon_cff import *
 #
-# CTPPS Digis (now only Pixel)
+# CTPPS Digis
 # returns sequence "ctppsDigi"
 #
 from SimCTPPS.Configuration.SimCTPPS_cff import *
