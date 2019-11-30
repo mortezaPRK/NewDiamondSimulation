@@ -196,7 +196,8 @@ void CTPPSDiamondDigiAnalyzer::analyze(const Event &event, const EventSetup &eve
     if (verbosity_ > 2)
     {
       std::cout << "FF  " << DSViter->detId() << std::endl;
-      for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
+      /* TODO: for pixel only
+for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
       {
         std::cout << "           Digi row  " << di->row() << ", col " << di->column() << std::endl;
 
@@ -209,8 +210,10 @@ void CTPPSDiamondDigiAnalyzer::analyze(const Event &event, const EventSetup &eve
         theRDimDetTopology_.pixelRange(rr, cc, lx, ux, ly, uy); // TODO: not found in CMS (in .h)
         cout << " pixel boundaries x low up, y low up " << lx << " " << ux << " " << ly << " " << uy << endl;
       }
+      */
     }
 
+    /*
     if (DSViter->detId() == SELECTED_UNITID && found_hit_inside_selected_pixel)
     {
       for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
@@ -244,6 +247,7 @@ void CTPPSDiamondDigiAnalyzer::analyze(const Event &event, const EventSetup &eve
         }
       }
     }
+    */
 
     if (corresponding_digi_cluster_size > 0)
     {
