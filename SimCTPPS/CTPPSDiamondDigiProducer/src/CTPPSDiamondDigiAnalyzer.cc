@@ -88,6 +88,9 @@ void CTPPSDiamondDigiAnalyzer::endJob()
 
 void CTPPSDiamondDigiAnalyzer::analyze(const Event &event, const EventSetup &eventSetup)
 {
+}
+/*void CTPPSDiamondDigiAnalyzer::analyze(const Event &event, const EventSetup &eventSetup)
+{
   if (verbosity_ > 0)
     cout << "--- Run: " << event.id().run()
          << " Event: " << event.id().event() << endl;
@@ -196,7 +199,7 @@ void CTPPSDiamondDigiAnalyzer::analyze(const Event &event, const EventSetup &eve
     if (verbosity_ > 2)
     {
       std::cout << "FF  " << DSViter->detId() << std::endl;
-      /* TODO: for pixel only
+      
 for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
       {
         std::cout << "           Digi row  " << di->row() << ", col " << di->column() << std::endl;
@@ -210,10 +213,10 @@ for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
         theRDimDetTopology_.pixelRange(rr, cc, lx, ux, ly, uy); // TODO: not found in CMS (in .h)
         cout << " pixel boundaries x low up, y low up " << lx << " " << ux << " " << ly << " " << uy << endl;
       }
-      */
+      
     }
 
-    /*
+    
     if (DSViter->detId() == SELECTED_UNITID && found_hit_inside_selected_pixel)
     {
       for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
@@ -247,7 +250,7 @@ for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
         }
       }
     }
-    */
+    
 
     if (corresponding_digi_cluster_size > 0)
     {
@@ -277,6 +280,7 @@ for (edm::DetSet<CTPPSDiamondDigi>::const_iterator di = begin; di != end; di++)
   if (verbosity_ > 1)
     std::cout << "numberOfDetUnits in the event: " << numberOfDetUnits << std::endl;
 }
+*/
 
 #include "FWCore/PluginManager/interface/ModuleDef.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
