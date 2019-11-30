@@ -3,7 +3,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include <vector>
-// #include "Geometry/VeryForwardGeometry/interface/CTPPSPixelSimTopology.h" // TODO: not found in CMS
+#include "Geometry/VeryForwardGeometry/interface/CTPPSPixelSimTopology.h" // TODO: not found in CMS
 #include "SimCTPPS/CTPPSDiamondDigiProducer/interface/RDimSignalPoint.h"
 
 class TFile;
@@ -18,7 +18,7 @@ private:
   uint32_t det_id_;
   std::vector<double> signalCoupling_;
   std::map<unsigned short, double, std::less<unsigned short>> theDiamondChargeMap;
-  // CTPPSPixelSimTopology theRPixDetTopology_; // TODO: not found in CMS
+  CTPPSPixelSimTopology theRDimDetTopology_; // TODO: not found in CMS
   double sqrt_2;
   int no_of_pixels_;
   int verbosity_;

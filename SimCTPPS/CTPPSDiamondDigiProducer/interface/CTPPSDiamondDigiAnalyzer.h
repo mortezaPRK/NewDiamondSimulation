@@ -16,7 +16,7 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 
-// #include "Geometry/VeryForwardGeometry/interface/CTPPSPixelSimTopology.h" // TODO: not found in CMS 
+#include "Geometry/VeryForwardGeometry/interface/CTPPSPixelSimTopology.h" // TODO: not found in CMS 
 #include "TH2D.h"
 
 class TH1F;
@@ -54,7 +54,7 @@ private:
   edm::EDGetTokenT<edm::PSimHitContainer> psim_token;
   edm::EDGetTokenT<edm::DetSetVector<CTPPSDiamondDigi>> pixel_token;
 
-  // CTPPSPixelSimTopology theRPixDetTopology_; // TODO: not found in CMS
+  CTPPSPixelSimTopology theRDimDetTopology_; // TODO: not found in CMS
   unsigned int found_corresponding_digi_count;
   unsigned int cumulative_cluster_size[3];
 };
