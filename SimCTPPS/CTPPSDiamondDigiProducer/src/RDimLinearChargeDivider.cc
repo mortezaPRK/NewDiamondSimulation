@@ -2,7 +2,7 @@
 #include "Geometry/VeryForwardGeometry/interface/RDimHepPDTWrapper.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
-#include "Geometry/VeryForwardGeometry/interface/CTPPSDiamondTopology.h"
+#include "Geometry/VeryForwardGeometry/interface/CTPPSPixelTopology.h"
 
 RDimLinearChargeDivider::RDimLinearChargeDivider(const edm::ParameterSet &params,  CLHEP::HepRandomEngine& eng,
     uint32_t det_id) : params_(params), rndEngine(eng) , _det_id(det_id)

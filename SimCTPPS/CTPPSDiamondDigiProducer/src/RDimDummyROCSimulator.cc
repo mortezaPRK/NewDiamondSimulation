@@ -1,5 +1,5 @@
 #include "SimCTPPS/CTPPSDiamondDigiProducer/interface/RDimDummyROCSimulator.h"
-#include "Geometry/VeryForwardGeometry/interface/CTPPSDiamondTopology.h"
+#include "Geometry/VeryForwardGeometry/interface/CTPPSPixelTopology.h"
 #include <vector>
 #include "TRandom.h"
 #include <iostream>
@@ -13,7 +13,7 @@ RDimDummyROCSimulator::RDimDummyROCSimulator(const edm::ParameterSet &params, ui
   electron_per_adc_ = params.getParameter<double>("RDimDummyROCElectronPerADC");
   dead_pixel_probability_ = params.getParameter<double>("RDimDeadDiamondProbability");
   dead_pixels_simulation_on_ = params.getParameter<bool>("RDimDeadDiamondSimulationOn");
-  pixels_no_ = CTPPSDiamondTopology().detPixelNo();
+  pixels_no_ = CTPPSPixelTopology().detPixelNo();
   verbosity_ = params.getParameter<int>("RDimVerbosity");
   links_persistence_ = params.getParameter<bool>("CTPPSDiamondDigiSimHitRelationsPersistence");
   

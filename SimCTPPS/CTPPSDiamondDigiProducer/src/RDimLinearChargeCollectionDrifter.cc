@@ -1,5 +1,5 @@
 #include "SimCTPPS/CTPPSDiamondDigiProducer/interface/RDimLinearChargeCollectionDrifter.h"
-#include "Geometry/VeryForwardGeometry/interface/CTPPSDiamondTopology.h"
+#include "Geometry/VeryForwardGeometry/interface/CTPPSPixelTopology.h"
 #include <iostream>
 #include <vector>
 
@@ -10,7 +10,7 @@ RDimLinearChargeCollectionDrifter::RDimLinearChargeCollectionDrifter
   //charge_cloud_sigma_ = params.getParameter<double>("RDimInterStripSmearing");
   GeV_per_electron_ = params.getParameter<double>("RDimGeVPerElectron");
   charge_cloud_sigmas_vect_ = params.getParameter< std::vector<double> >("RDimInterSmearing");
-  det_thickness_ = CTPPSDiamondTopology().detThickness();
+  det_thickness_ = CTPPSPixelTopology().detThickness();
   _det_id=det_id;
 }
 

@@ -3,13 +3,13 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "SimCTPPS/CTPPSDiamondDigiProducer/interface/RDimDetDigitizer.h"
-#include "Geometry/VeryForwardGeometry/interface/CTPPSDiamondTopology.h"
+#include "Geometry/VeryForwardGeometry/interface/CTPPSPixelTopology.h"
 
 RDimDetDigitizer::RDimDetDigitizer(const edm::ParameterSet &params, CLHEP::HepRandomEngine &eng, uint32_t det_id, const edm::EventSetup &iSetup)
     : params_(params), det_id_(det_id)
 {
   verbosity_ = params.getParameter<int>("RDimVerbosity");
-  numPixels = CTPPSDiamondTopology().detPixelNo();
+  numPixels = CTPPSPixelTopology().detPixelNo();
   theNoiseInElectrons = params.getParameter<double>("RDimEquivalentNoiseCharge");
   thePixelThresholdInE = params.getParameter<double>("RDimDummyROCThreshold");
   noNoise = params.getParameter<bool>("RDimNoNoise");
