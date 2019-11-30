@@ -25,20 +25,20 @@ process.load('Configuration.StandardSequences.SimL1Emulator_cff')  #
 process.load('Configuration.StandardSequences.cmsCTPPSDigiToRaw_cff')  # <--
 process.load('HLTrigger.Configuration.HLT_2e34v31_cff')  #
 process.load('Configuration.StandardSequences.EndOfProcess_cff')  #
-process.load(
-    'Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')  #
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')  #
 process.load('Configuration.Geometry.GeometryExtended2017dev_cff')  #
-process.load(
-    "CondFormats.CTPPSReadoutObjects.CTPPSPixelDAQMappingESSourceXML_cfi")  # <--
-process.maxEvents = cms.untracked.PSet(
-    input=cms.untracked.int32(-1)
-)
+process.load("CondFormats.CTPPSReadoutObjects.CTPPSPixelDAQMappingESSourceXML_cfi")  # <--
+process.load("CondFormats.CTPPSReadoutObjects.CTPPSDiamondDAQMappingESSourceXML_cfi")  # <--
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 
 process.load("IOMC.RandomEngine.IOMC_cff")
 process.RandomNumberGeneratorService.generator.initialSeed = 456789
 process.RandomNumberGeneratorService.g4SimHits.initialSeed = 9876
 process.RandomNumberGeneratorService.VtxSmeared.initialSeed = 123456789
 process.RandomNumberGeneratorService.RPixDetDigitizer = cms.PSet(
+    initialSeed=cms.untracked.uint32(137137)
+)
+process.RandomNumberGeneratorService.RDimDetDigitizer = cms.PSet(
     initialSeed=cms.untracked.uint32(137137)
 )
 
@@ -94,7 +94,9 @@ process.FEVTDEBUGHLToutput = cms.OutputModule(
     outputCommands=process.FEVTDEBUGHLTEventContent.outputCommands +
     [
         'keep *_RPixDetDigitizer_*_*',
-        'keep *_ctppsPixelRawData_*_*'
+        'keep *_ctppsPixelRawData_*_*',
+        'keep *_RDimDetDigitizer_*_*',
+        'keep *_ctppsDiamondRawData_*_*'
     ],
     splitLevel=cms.untracked.int32(0)
 )

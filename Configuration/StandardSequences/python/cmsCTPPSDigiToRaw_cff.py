@@ -6,6 +6,7 @@ from Configuration.Eras.Modifier_phase2_common_cff import phase2_common
 from L1Trigger.Configuration.L1TDigiToRaw_cff import *
 from EventFilter.RawDataCollector.rawDataCollector_cfi import *
 from EventFilter.CTPPSRawToDigi.CTPPSPixelDigiToRaw_cfi import *
+from EventFilter.CTPPSRawToDigi.CTPPSDiamondDigiToRaw_cfi import *
 from EventFilter.CastorRawToDigi.CastorDigiToRaw_cfi import *
 from EventFilter.RPCRawToDigi.rpcPacker_cfi import *
 from EventFilter.DTRawToDigi.dtPacker_cfi import *
@@ -33,6 +34,7 @@ DigiToRaw = cms.Sequence(
     dtpacker *
     rpcpacker *
     ctppsPixelRawData *
+    ctppsDiamondRawData *
     castorRawData *
     rawDataCollector
 )
