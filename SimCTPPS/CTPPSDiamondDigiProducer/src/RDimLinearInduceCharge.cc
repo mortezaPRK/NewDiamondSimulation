@@ -69,7 +69,7 @@ std::map<unsigned short, double, std::less<unsigned short> >  RDimLinearInduceCh
 
 //        QUI SI POTREBBE INTRODURRE IL CHARGE SHARING TRA I PIXELS ..................................       
       if (signalCoupling_[0]==0.){
-          thePixelChargeMap[pixel_no] += charge_in_pixel;
+          theDiamondChargeMap[pixel_no] += charge_in_pixel;
       } else {
        int pixel_row = (*j).pixelRowNo();
        int pixel_col = (*j).pixelColNo();
@@ -86,7 +86,7 @@ std::map<unsigned short, double, std::less<unsigned short> >  RDimLinearInduceCh
 
         double hit2neighbour[8];
         double collect_prob = hChargeMap->GetBinContent(hChargeMap->FindBin(((*i).Y()-pixel_center_y)*1.e3,((*i).X()-pixel_center_x)*1.e3));
-       thePixelChargeMap[pixel_no] += charge_in_pixel*collect_prob;
+       theDiamondChargeMap[pixel_no] += charge_in_pixel*collect_prob;
         unsigned short neighbour_no[8];
         unsigned short m=0;
         double closer_neighbour=0;
@@ -118,9 +118,9 @@ std::map<unsigned short, double, std::less<unsigned short> >  RDimLinearInduceCh
           }
         }
           double chargetransfereff = (1-collect_prob)*signalCoupling_[0];
-          thePixelChargeMap[closer_no] += charge_in_pixel*chargetransfereff;
+          theDiamondChargeMap[closer_no] += charge_in_pixel*chargetransfereff;
       }
     }
   }
-  return thePixelChargeMap;
+  return theDiamondChargeMap;
 }
