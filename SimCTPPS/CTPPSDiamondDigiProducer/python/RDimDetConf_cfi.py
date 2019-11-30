@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 RDimDetDigitizer = cms.EDProducer(
-    "CTPPSPixelDigiProducer",
+    "CTPPSDiamondDigiProducer",
 
     # all distances in [mm]
     # RPDigiProducer
