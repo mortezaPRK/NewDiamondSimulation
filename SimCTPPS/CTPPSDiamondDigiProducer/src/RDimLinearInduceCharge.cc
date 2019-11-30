@@ -22,7 +22,7 @@ RDimLinearInduceCharge::RDimLinearInduceCharge(const edm::ParameterSet &params, 
 std::map<unsigned short, double, std::less<unsigned short> >  RDimLinearInduceCharge::Induce(
     const std::vector<RDimSignalPoint> &charge_map)
 {
-  thePixelChargeMap.clear();
+  theDiamondChargeMap.clear();
   if(verbosity_)
     std::cout<<"RDimLinearInduceCharge "<<det_id_<<" : Clouds to be induced= "<<charge_map.size()<<std::endl;
   for(std::vector<RDimSignalPoint>::const_iterator i=charge_map.begin(); 
