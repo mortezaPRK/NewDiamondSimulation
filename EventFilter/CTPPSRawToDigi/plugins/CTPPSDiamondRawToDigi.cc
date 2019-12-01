@@ -35,7 +35,7 @@ CTPPSDiamondRawToDigi::CTPPSDiamondRawToDigi( const edm::ParameterSet& conf )
   produces< edm::DetSetVector<CTPPSDiamondDigi> >();
 
 //CablingMap could have a label //Tav
-  mappingLabel_ = config_.getParameter<std::string> ("mappingLabel"); //RPix
+  mappingLabel_ = config_.getParameter<std::string> ("mappingLabel"); //RDim
 
 }
 

@@ -10,7 +10,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "CondFormats/DataRecord/interface/CTPPSDiamondDAQMappingRcd.h"
+// #include "CondFormats/DataRecord/interface/CTPPSDiamondDAQMappingRcd.h"
 #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondDAQMapping.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/CTPPSDigi/interface/CTPPSDiamondDigi.h"
@@ -41,7 +41,7 @@ private:
   edm::InputTag label_;  //label of input digi data
   int allDigiCounter;
   int allWordCounter;
-  edm::ESWatcher<CTPPSDiamondDAQMappingRcd> recordWatcher;
+  // edm::ESWatcher<CTPPSDiamondDAQMappingRcd> recordWatcher;
   bool debug;
   edm::EDGetTokenT<edm::DetSetVector<CTPPSDiamondDigi>> tCTPPSDiamondDigi; 
   std::map< std::map<const uint32_t, short unsigned int> ,  std::map<short unsigned int, short unsigned int>  > iDdet2fed_;
