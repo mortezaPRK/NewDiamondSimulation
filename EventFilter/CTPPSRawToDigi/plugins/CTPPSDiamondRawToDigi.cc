@@ -50,45 +50,45 @@ void CTPPSDiamondRawToDigi::produce( edm::Event& ev,
 {
 
 
-  edm::Handle<FEDRawDataCollection> buffers;
-  ev.getByToken(FEDRawDataCollection_, buffers);
+//   edm::Handle<FEDRawDataCollection> buffers;
+//   ev.getByToken(FEDRawDataCollection_, buffers);
 
-  edm::ESHandle<CTPPSDiamondDAQMapping> mapping;
+//   edm::ESHandle<CTPPSDiamondDAQMapping> mapping;
 
-  bool data_exist=false;
-  for(int fed = FEDNumbering::MINCTPPSDiamondsFEDID; fed <=  FEDNumbering::MAXCTPPSDiamondsFEDID; fed++){
-    const FEDRawData& tempRawData = buffers->FEDData( fed );
-    if(tempRawData.size()!=0){
-      data_exist=true;
-      break;
-    }
-  }
-/// create product (digis & errors)
-  auto collection = std::make_unique<edm::DetSetVector<CTPPSDiamondDigi>>();
-
-
-  if(data_exist){
-  //es.get<CTPPSDiamondDAQMappingRcd>().get( mapping);
-  es.get<CTPPSDiamondDAQMappingRcd>().get(mappingLabel_, mapping);
+//   bool data_exist=false;
+//   for(int fed = FEDNumbering::MINCTPPSDiamondsFEDID; fed <=  FEDNumbering::MAXCTPPSDiamondsFEDID; fed++){
+//     const FEDRawData& tempRawData = buffers->FEDData( fed );
+//     if(tempRawData.size()!=0){
+//       data_exist=true;
+//       break;
+//     }
+//   }
+// /// create product (digis & errors)
+//   auto collection = std::make_unique<edm::DetSetVector<CTPPSDiamondDigi>>();
 
 
-    fedIds_   = mapping->fedIds();
+//   if(data_exist){
+//   //es.get<CTPPSDiamondDAQMappingRcd>().get( mapping);
+//   es.get<CTPPSDiamondDAQMappingRcd>().get(mappingLabel_, mapping);
 
-    CTPPSDiamondDataFormatter formatter(mapping->ROCMapping);
+
+//     fedIds_   = mapping->fedIds();
+
+//     CTPPSDiamondDataFormatter formatter(mapping->ROCMapping);
     
-    bool errorsInEvent = false; 
-    for (auto aFed = fedIds_.begin(); aFed != fedIds_.end(); ++aFed) {
-      int fedId = *aFed;
+//     bool errorsInEvent = false; 
+//     for (auto aFed = fedIds_.begin(); aFed != fedIds_.end(); ++aFed) {
+//       int fedId = *aFed;
       
-      edm::LogInfo("CTPPSDiamondRawToDigi")<< " PRODUCE DIGI FOR FED: " <<  dec <<fedId << endl;
-/// get event data for this fed
-      const FEDRawData& fedRawData = buffers->FEDData( fedId );
+//       edm::LogInfo("CTPPSDiamondRawToDigi")<< " PRODUCE DIGI FOR FED: " <<  dec <<fedId << endl;
+// /// get event data for this fed
+//       const FEDRawData& fedRawData = buffers->FEDData( fedId );
       
-      formatter.interpretRawData( errorsInEvent, fedId, fedRawData, *collection);
-    }
-  }
-///send digis and errors back to framework 
-  ev.put(std::move(collection));
+//       formatter.interpretRawData( errorsInEvent, fedId, fedRawData, *collection);
+//     }
+//   }
+// ///send digis and errors back to framework 
+//   ev.put(std::move(collection));
 
 }
 
