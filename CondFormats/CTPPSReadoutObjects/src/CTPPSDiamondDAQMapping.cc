@@ -31,14 +31,14 @@ std::ostream& operator << (std::ostream& s, const CTPPSDiamondROCInfo &vi)
 
 //----------------------------------------------------------------------------------------------------
 
-void CTPPSDiamondDAQMapping::insert(const CTPPSDiamondFramePosition &fp, const CTPPSDiamondROCInfo &vi)
-{
-  auto it = ROCMapping.find(fp);  
-  if (it != ROCMapping.end())
-    {
-      edm::LogError("RDim") << "WARNING in DAQMapping::insert > Overwriting entry at " << fp << ". Previous: " 
-	   << "    " << ROCMapping[fp] << ","  << "  new: "  << "    " << vi << ". ";
-    }
+// void CTPPSDiamondDAQMapping::insert(const CTPPSDiamondFramePosition &fp, const CTPPSDiamondROCInfo &vi)
+// {
+//   auto it = ROCMapping.find(fp);  
+//   if (it != ROCMapping.end())
+//     {
+//       edm::LogError("RDim") << "WARNING in DAQMapping::insert > Overwriting entry at " << fp << ". Previous: " 
+// 	   << "    " << ROCMapping[fp] << ","  << "  new: "  << "    " << vi << ". ";
+//     }
 
-  ROCMapping[fp] = vi;
-}
+//   ROCMapping[fp] = vi;
+// }

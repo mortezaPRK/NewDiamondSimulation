@@ -10,8 +10,8 @@
 #define CondFormats_CTPPSReadoutObjects_CTPPSDiamondDAQMapping
 
 #include "CondFormats/Serialization/interface/Serializable.h"
-#include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondFramePosition.h"
-#include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondIndices.h"
+// #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondFramePosition.h"
+// #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondIndices.h"
 
 #include <map>
 #include <set>
@@ -42,9 +42,9 @@ public:
 class CTPPSDiamondDAQMapping
 {
 public:
-  std::map<CTPPSDiamondFramePosition, CTPPSDiamondROCInfo> ROCMapping;
+  // std::map<CTPPSDiamondFramePosition, CTPPSDiamondROCInfo> ROCMapping;
     
-  void insert(const CTPPSDiamondFramePosition &fp, const CTPPSDiamondROCInfo &vi);
+  // void insert(const CTPPSDiamondFramePosition &fp, const CTPPSDiamondROCInfo &vi);
 
   std::set<unsigned int> fedIds() const;
 

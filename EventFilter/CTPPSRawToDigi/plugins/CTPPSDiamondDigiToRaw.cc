@@ -11,7 +11,7 @@
 #include "DataFormats/FEDRawData/interface/FEDRawData.h"
 
 #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondDAQMapping.h"
-#include "CondFormats/DataRecord/interface/CTPPSDiamondDAQMappingRcd.h"
+// #include "CondFormats/DataRecord/interface/CTPPSDiamondDAQMappingRcd.h"
 
 #include "EventFilter/CTPPSRawToDigi/interface/CTPPSDiamondDataFormatter.h"
 
@@ -69,24 +69,24 @@ void CTPPSDiamondDigiToRaw::produce( edm::Event& ev,
   }
   allDigiCounter += digiCounter;
    edm::ESHandle<CTPPSDiamondDAQMapping> mapping;
-  if (recordWatcher.check( es )) {
-    //es.get<CTPPSDiamondDAQMappingRcd>().get(mapping);
-    es.get<CTPPSDiamondDAQMappingRcd>().get("RDim",mapping);
-    for (const auto &p : mapping->ROCMapping)    {
-        const uint32_t piD = p.second.iD;  
-        short unsigned int pROC   = p.second.roc;
-        short unsigned int pFediD = p.first.getFEDId();
-        short unsigned int pFedcH = p.first.getChannelIdx();
+  // if (recordWatcher.check( es )) {
+  //   //es.get<CTPPSDiamondDAQMappingRcd>().get(mapping);
+  //   es.get<CTPPSDiamondDAQMappingRcd>().get("RDim",mapping);
+  //   for (const auto &p : mapping->ROCMapping)    {
+  //       const uint32_t piD = p.second.iD;  
+  //       short unsigned int pROC   = p.second.roc;
+  //       short unsigned int pFediD = p.first.getFEDId();
+  //       short unsigned int pFedcH = p.first.getChannelIdx();
 	 
-	std::map<const uint32_t,short unsigned int> mapDetRoc; 
-        mapDetRoc.insert(std::pair<const uint32_t,short unsigned int>(piD,pROC)); 
-	std::map<short unsigned int,short unsigned int> mapFedIdCh; 
-        mapFedIdCh.insert(std::pair<short unsigned int,short unsigned int>(pFediD,pFedcH)); 
+	// std::map<const uint32_t,short unsigned int> mapDetRoc; 
+  //       mapDetRoc.insert(std::pair<const uint32_t,short unsigned int>(piD,pROC)); 
+	// std::map<short unsigned int,short unsigned int> mapFedIdCh; 
+  //       mapFedIdCh.insert(std::pair<short unsigned int,short unsigned int>(pFediD,pFedcH)); 
 
-	iDdet2fed_.insert(std::pair<std::map<const uint32_t,short unsigned int> ,std::map<short unsigned int,short unsigned int>>(mapDetRoc,mapFedIdCh));
-    }
-    fedIds_ = mapping->fedIds();
-  }
+	// iDdet2fed_.insert(std::pair<std::map<const uint32_t,short unsigned int> ,std::map<short unsigned int,short unsigned int>>(mapDetRoc,mapFedIdCh));
+  //   }
+  //   fedIds_ = mapping->fedIds();
+  // }
 
   CTPPSDiamondDataFormatter formatter(mapping->ROCMapping);
 
