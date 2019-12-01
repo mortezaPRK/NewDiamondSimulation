@@ -88,7 +88,7 @@ private:
 
   std::string print(const Word64    & word) const;
 
-  const std::map<CTPPSDiamondFramePosition, CTPPSDiamondROCInfo> &mapping_;
+  // const std::map<CTPPSDiamondFramePosition, CTPPSDiamondROCInfo> &mapping_;
 
   // CTPPSDiamondIndices theIndices;
 
