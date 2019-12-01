@@ -13,7 +13,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 
-#include "CondFormats/DataRecord/interface/CTPPSDiamondDAQMappingRcd.h"
+// #include "CondFormats/DataRecord/interface/CTPPSDiamondDAQMappingRcd.h"
 #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondDAQMapping.h"
 
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
