@@ -37,7 +37,7 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 
 #include "EventFilter/CTPPSRawToDigi/interface/RPixErrorChecker.h"
-#include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondIndices.h"
+// #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondIndices.h"
 #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSElectronicIndex.h"
 #include "FWCore/Utilities/interface/typedefs.h"
 
@@ -90,7 +90,7 @@ private:
 
   const std::map<CTPPSDiamondFramePosition, CTPPSDiamondROCInfo> &mapping_;
 
-  CTPPSDiamondIndices theIndices;
+  // CTPPSDiamondIndices theIndices;
 
 };
 
