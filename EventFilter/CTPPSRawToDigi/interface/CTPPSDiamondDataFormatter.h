@@ -36,7 +36,7 @@
 #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondDAQMapping.h" 
 #include "DataFormats/Common/interface/DetSetVector.h"
 
-#include "EventFilter/CTPPSRawToDigi/interface/RPixErrorChecker.h"
+// #include "EventFilter/CTPPSRawToDigi/interface/RPixErrorChecker.h"
 // #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondIndices.h"
 #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSElectronicIndex.h"
 #include "FWCore/Utilities/interface/typedefs.h"
@@ -61,7 +61,7 @@ public:
   typedef uint32_t Word32;
   typedef uint64_t Word64;
 
-  CTPPSDiamondDataFormatter(std::map<CTPPSDiamondFramePosition, CTPPSDiamondROCInfo> const &mapping);
+  // CTPPSDiamondDataFormatter(std::map<CTPPSDiamondFramePosition, CTPPSDiamondROCInfo> const &mapping);
 
   int nWords() const { return theWordCounter; }
   int nDigis() const { return theDigiCounter; }
@@ -75,7 +75,7 @@ private:
   mutable int theWordCounter;
   mutable int theDigiCounter;
 
-  RPixErrorChecker errorcheck;
+  // RPixErrorChecker errorcheck;
 
   int m_ADC_shift, m_PXID_shift, m_DCOL_shift, m_ROC_shift, m_LINK_shift;
   Word32 m_LINK_mask, m_ROC_mask, m_DCOL_mask, m_PXID_mask, m_ADC_mask;

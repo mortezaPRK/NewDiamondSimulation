@@ -45,7 +45,7 @@ private:
   bool debug;
   edm::EDGetTokenT<edm::DetSetVector<CTPPSDiamondDigi>> tCTPPSDiamondDigi; 
   std::map< std::map<const uint32_t, short unsigned int> ,  std::map<short unsigned int, short unsigned int>  > iDdet2fed_;
-  CTPPSDiamondFramePosition fPos_;
+  // CTPPSDiamondFramePosition fPos_;
 
 };
 #endif
