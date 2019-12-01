@@ -50,25 +50,25 @@ CTPPSDiamondDigiToRaw::~CTPPSDiamondDigiToRaw() {
 void CTPPSDiamondDigiToRaw::produce( edm::Event& ev,
                               const edm::EventSetup& es)
 {
-  eventCounter++;
-  edm::LogInfo("CTPPSDiamondDigiToRaw") << "[CTPPSDiamondDigiToRaw::produce] "
-                                   << "event number: " << eventCounter;
+  // eventCounter++;
+  // edm::LogInfo("CTPPSDiamondDigiToRaw") << "[CTPPSDiamondDigiToRaw::produce] "
+  //                                  << "event number: " << eventCounter;
 
-  edm::Handle< edm::DetSetVector<CTPPSDiamondDigi> > digiCollection;
-  label_ = config_.getParameter<edm::InputTag>("InputLabel");
-  ev.getByToken( tCTPPSDiamondDigi, digiCollection);
+  // edm::Handle< edm::DetSetVector<CTPPSDiamondDigi> > digiCollection;
+  // label_ = config_.getParameter<edm::InputTag>("InputLabel");
+  // ev.getByToken( tCTPPSDiamondDigi, digiCollection);
 
-  CTPPSDiamondDataFormatter::RawData rawdata;
-  CTPPSDiamondDataFormatter::Digis digis;
-  typedef vector< edm::DetSet<CTPPSDiamondDigi> >::const_iterator DI;
+  // CTPPSDiamondDataFormatter::RawData rawdata;
+  // CTPPSDiamondDataFormatter::Digis digis;
+  // typedef vector< edm::DetSet<CTPPSDiamondDigi> >::const_iterator DI;
 
-  int digiCounter = 0; 
-  for (DI di=digiCollection->begin(); di != digiCollection->end(); di++) {
-    digiCounter += (di->data).size(); 
-    digis[ di->id] = di->data;
-  }
-  allDigiCounter += digiCounter;
-   edm::ESHandle<CTPPSDiamondDAQMapping> mapping;
+  // int digiCounter = 0; 
+  // for (DI di=digiCollection->begin(); di != digiCollection->end(); di++) {
+  //   digiCounter += (di->data).size(); 
+  //   digis[ di->id] = di->data;
+  // }
+  // allDigiCounter += digiCounter;
+  //  edm::ESHandle<CTPPSDiamondDAQMapping> mapping;
   // if (recordWatcher.check( es )) {
   //   //es.get<CTPPSDiamondDAQMappingRcd>().get(mapping);
   //   es.get<CTPPSDiamondDAQMappingRcd>().get("RDim",mapping);
@@ -88,26 +88,26 @@ void CTPPSDiamondDigiToRaw::produce( edm::Event& ev,
   //   fedIds_ = mapping->fedIds();
   // }
 
-  CTPPSDiamondDataFormatter formatter(mapping->ROCMapping);
+  // CTPPSDiamondDataFormatter formatter(mapping->ROCMapping);
 
-  // create product (raw data)
-  auto buffers = std::make_unique<FEDRawDataCollection>();
+  // // create product (raw data)
+  // auto buffers = std::make_unique<FEDRawDataCollection>();
 
-  // convert data to raw
-  formatter.formatRawData( ev.id().event(), rawdata, digis, iDdet2fed_);
+  // // convert data to raw
+  // formatter.formatRawData( ev.id().event(), rawdata, digis, iDdet2fed_);
   
-  // pack raw data into collection
-  for (auto it = fedIds_.begin(); it != fedIds_.end(); it++) { 
-    FEDRawData& fedRawData = buffers->FEDData( *it );
-    CTPPSDiamondDataFormatter::RawData::iterator fedbuffer = rawdata.find( *it );
-    if( fedbuffer != rawdata.end() ) fedRawData = fedbuffer->second;
-  }
-	allWordCounter += formatter.nWords();
+  // // pack raw data into collection
+  // for (auto it = fedIds_.begin(); it != fedIds_.end(); it++) { 
+  //   FEDRawData& fedRawData = buffers->FEDData( *it );
+  //   CTPPSDiamondDataFormatter::RawData::iterator fedbuffer = rawdata.find( *it );
+  //   if( fedbuffer != rawdata.end() ) fedRawData = fedbuffer->second;
+  // }
+	// allWordCounter += formatter.nWords();
 
-	if (debug) LogDebug("CTPPSDiamondDigiToRaw") 
-	        << "Words/Digis this ev: "<<digiCounter<<"(fm:"<<formatter.nDigis()<<")/"
-        	<<formatter.nWords()
-	        <<"  all: "<< allDigiCounter <<"/"<<allWordCounter;
+	// if (debug) LogDebug("CTPPSDiamondDigiToRaw") 
+	//         << "Words/Digis this ev: "<<digiCounter<<"(fm:"<<formatter.nDigis()<<")/"
+  //       	<<formatter.nWords()
+	//         <<"  all: "<< allDigiCounter <<"/"<<allWordCounter;
 
-	ev.put(std::move(buffers));
+	// ev.put(std::move(buffers));
 }
