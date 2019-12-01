@@ -16,9 +16,9 @@ using namespace std;
 
 std::set<unsigned int> CTPPSDiamondDAQMapping::fedIds() const {
   std::set<unsigned int> fedSet;
-  for (const auto &p : ROCMapping){
-    fedSet.insert(p.first.getFEDId() );
-  }
+  // for (const auto &p : ROCMapping){
+  //   fedSet.insert(p.first.getFEDId() );
+  // }
   return fedSet;
 }
 

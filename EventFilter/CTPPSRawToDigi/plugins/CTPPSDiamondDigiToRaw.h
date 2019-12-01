@@ -14,7 +14,7 @@
 #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondDAQMapping.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/CTPPSDigi/interface/CTPPSDiamondDigi.h"
-#include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondFramePosition.h"
+// #include "CondFormats/CTPPSReadoutObjects/interface/CTPPSDiamondFramePosition.h"
 
 
 class CTPPSDiamondDigiToRaw final : public edm::EDProducer {
